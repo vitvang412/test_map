@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (locationPopup) locationPopup.remove();
 
         // Hiện popup loading ngay lập tức
-        locationPopup = new goongjs.Popup({ offset: 12, closeButton: true, maxWidth: '280px' })
+        locationPopup = new goongjs.Popup({ offset: 12, closeButton: true, maxWidth: '320px' })
             .setLngLat([lng, lat])
             .setHTML(buildLocPopupLoading())
             .addTo(map);
@@ -125,15 +125,20 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function buildLocPopupLoading() {
-        return `<div class="lp">
-            <div class="lp__top">
-                <svg class="lp__pin" viewBox="0 0 20 24" fill="none">
-                    <path d="M10 0C6.13 0 3 3.13 3 7c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#10B981"/>
-                    <circle cx="10" cy="7" r="2.5" fill="white"/>
-                </svg>
-                <div style="flex:1">
-                    <div class="lp__skeleton--line" style="width:140px;margin-bottom:6px"></div>
-                    <div class="lp__skeleton--line" style="width:90px"></div>
+        return `<div class="lp lp--with-photo">
+            <div class="lp__photo">
+                <div class="lp__photo-skeleton"></div>
+            </div>
+            <div class="lp__body">
+                <div class="lp__top">
+                    <svg class="lp__pin" viewBox="0 0 20 24" fill="none">
+                        <path d="M10 0C6.13 0 3 3.13 3 7c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#10B981"/>
+                        <circle cx="10" cy="7" r="2.5" fill="white"/>
+                    </svg>
+                    <div style="flex:1">
+                        <div class="lp__skeleton--line" style="width:140px;margin-bottom:6px"></div>
+                        <div class="lp__skeleton--line" style="width:90px"></div>
+                    </div>
                 </div>
             </div>
         </div>`;
@@ -142,26 +147,43 @@ document.addEventListener('DOMContentLoaded', function () {
     function buildLocPopupFull(address, lat, lng, accuracy) {
         const latStr = lat >= 0 ? `${lat.toFixed(5)}°N` : `${Math.abs(lat).toFixed(5)}°S`;
         const lngStr = lng >= 0 ? `${lng.toFixed(5)}°E` : `${Math.abs(lng).toFixed(5)}°W`;
-        return `<div class="lp">
-            <div class="lp__top">
-                <svg class="lp__pin" viewBox="0 0 20 24" fill="none">
-                    <path d="M10 0C6.13 0 3 3.13 3 7c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#10B981"/>
-                    <circle cx="10" cy="7" r="2.5" fill="white"/>
-                </svg>
-                <div>
-                    <div class="lp__addr">${escHtml(address)}</div>
+        const d = 0.0012;
+        const satUrl = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export`
+            + `?bbox=${lng-d},${lat-d},${lng+d},${lat+d}&bboxSR=4326&imageSR=4326&size=640,240&format=jpg&f=image`;
+        return `<div class="lp lp--with-photo">
+            <div class="lp__photo">
+                <div class="lp__photo-skeleton"></div>
+                <img class="lp__photo-img" src="${satUrl}" alt=""
+                     onload="this.classList.add('loaded');this.previousElementSibling.style.display='none'"
+                     onerror="this.parentElement.style.display='none'" />
+                <div class="lp__photo-badge">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" width="10" height="10">
+                        <circle cx="8" cy="8" r="3"/><path d="M8 1v3M8 12v3M1 8h3M12 8h3"/>
+                    </svg>
+                    Vị trí của bạn
                 </div>
             </div>
-            <div class="lp__divider"></div>
-            <div class="lp__coords">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="11" height="11">
-                    <circle cx="8" cy="8" r="6.5"/><line x1="8" y1="1.5" x2="8" y2="14.5"/>
-                    <line x1="1.5" y1="8" x2="14.5" y2="8"/>
-                    <path d="M2.5 5.5 Q8 4 13.5 5.5" stroke-width="1.2"/>
-                    <path d="M2.5 10.5 Q8 12 13.5 10.5" stroke-width="1.2"/>
-                </svg>
-                <span>${latStr}&thinsp; ${lngStr}</span>
-                ${accuracy ? `<span class="lp__acc">&thinsp;±${Math.round(accuracy)}m</span>` : ''}
+            <div class="lp__body">
+                <div class="lp__top">
+                    <svg class="lp__pin" viewBox="0 0 20 24" fill="none">
+                        <path d="M10 0C6.13 0 3 3.13 3 7c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#10B981"/>
+                        <circle cx="10" cy="7" r="2.5" fill="white"/>
+                    </svg>
+                    <div>
+                        <div class="lp__addr">${escHtml(address)}</div>
+                    </div>
+                </div>
+                <div class="lp__divider"></div>
+                <div class="lp__coords">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="11" height="11">
+                        <circle cx="8" cy="8" r="6.5"/><line x1="8" y1="1.5" x2="8" y2="14.5"/>
+                        <line x1="1.5" y1="8" x2="14.5" y2="8"/>
+                        <path d="M2.5 5.5 Q8 4 13.5 5.5" stroke-width="1.2"/>
+                        <path d="M2.5 10.5 Q8 12 13.5 10.5" stroke-width="1.2"/>
+                    </svg>
+                    <span>${latStr}&thinsp; ${lngStr}</span>
+                    ${accuracy ? `<span class="lp__acc">&thinsp;±${Math.round(accuracy)}m</span>` : ''}
+                </div>
             </div>
         </div>`;
     }

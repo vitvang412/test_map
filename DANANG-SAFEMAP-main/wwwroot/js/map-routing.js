@@ -12,15 +12,11 @@ function waitForMap(cb, n = 0) {
     else { console.error('[ROUTE] MapInstance not found'); }
 }
 
-// ─── Hệ số hiệu chỉnh thời gian theo thực tế giao thông Việt Nam ───────────
-const TRAFFIC_FACTOR = {
-    driving: 1.40,   // ô tô bị kẹt hơn, hệ số lớn nhất
-    motorbike: 1.20,   // xe máy len lỏi nhanh hơn ô tô ~15-20%
-    foot: 1.15,   // đi bộ: cộng thêm hệ số đèn đỏ, vỉa hè hẹp VN
-};
+// Tốc độ trung bình xe đạp VN (~15 km/h)
+const CYCLING_SPEED_MPS = 4.17; // m/s
 
-// Tốc độ đi bộ thực tế VN (~4 km/h), dùng để tính fallback khi OSRM foot lỗi
-const WALK_SPEED_MPS = 1.1; // m/s ≈ 3.96 km/h
+// Hệ số hiệu chỉnh nhẹ cho xe đạp (đèn đỏ, tránh xe…)
+const CYCLING_FACTOR = 1.15;
 
 function initRouting(map) {
 
@@ -41,7 +37,7 @@ function initRouting(map) {
     let coordStart = null, coordEnd = null;
     let startMarker = null, endMarker = null;
 
-    let storedRoutes = { driving: null, motorbike: null, foot: null };
+    let storedRoutes = { driving: null, motorbike: null, cycling: null };
     let activeMode = 'driving';
 
     // ── Pre-fill khi mở từ Place Card ─────────────────────
@@ -176,7 +172,7 @@ function initRouting(map) {
     const ROW_MAP = [
         ['resDriving', 'driving'],
         ['resMoto', 'motorbike'],
-        ['resFoot', 'foot'],
+        ['resCycling', 'cycling'],
     ];
 
     ROW_MAP.forEach(([id, mode]) => {
@@ -194,7 +190,7 @@ function initRouting(map) {
     }
 
     // ─────────────────────────────────────────────────────
-    // TÌM ĐƯỜNG
+    // TÌM ĐƯỜNG — dùng Goong Directions API
     // ─────────────────────────────────────────────────────
     btnFind?.addEventListener('click', async () => {
         const sv = inpStart?.value.trim();
@@ -211,41 +207,36 @@ function initRouting(map) {
         if (!coordEnd) { showStatus('Không tìm thấy điểm đến.', 'error'); return; }
 
         try {
-            // Gọi song song 2 profile: driving + foot
-            const [rDriving, rFoot] = await Promise.all([
-                osrm(coordStart, coordEnd, 'driving'),
-                osrm(coordStart, coordEnd, 'foot'),
+            // Gọi Goong Directions cho ô tô + xe máy (song song)
+            const [rCar, rBike] = await Promise.all([
+                goongDirection(coordStart, coordEnd, 'car'),
+                goongDirection(coordStart, coordEnd, 'bike'),
             ]);
 
-            console.log('[ROUTE] rDriving:', rDriving);
-            console.log('[ROUTE] rFoot:', rFoot);
-
-            if (!rDriving) { showStatus('Không tìm được đường đi đường bộ.', 'error'); return; }
-
-            // ── Xe máy: dùng geometry ô tô, tính time riêng ──────────────
-            const rMoto = {
+            // Fallback về OSRM nếu Goong lỗi
+            const rDriving = rCar || await osrm(coordStart, coordEnd, 'driving');
+            const rMoto = rBike || (rDriving ? {
                 geometry: rDriving.geometry,
                 distance: rDriving.distance,
-                duration: rDriving.duration * 0.85, // Xe máy đi nhanh hơn ô tô lúc kẹt xe một chút
+                duration: rDriving.duration * 0.85,
+            } : null);
+
+            if (!rDriving) { showStatus('Không tìm được đường đi.', 'error'); return; }
+
+            // Xe đạp: dùng geometry xe máy, tính thời gian theo tốc độ xe đạp thực tế
+            const motoRoute = rMoto || rDriving;
+            const rCycling = {
+                geometry: motoRoute.geometry,
+                distance: motoRoute.distance,
+                duration: (motoRoute.distance / CYCLING_SPEED_MPS) * CYCLING_FACTOR,
             };
 
-            // ── Đi bộ: OSRM foot public server hay trả về tốc độ ảo của ô tô ───────────────
-            // Nên chúng ta luôn ép tính thời gian đi bộ = Quãng đường / Tốc độ đi bộ thực tế
-            const footDistance = rFoot ? rFoot.distance : rDriving.distance;
-            const footGeometry = rFoot ? rFoot.geometry : rDriving.geometry;
-            const rWalking = {
-                geometry: footGeometry,
-                distance: footDistance,
-                duration: footDistance / WALK_SPEED_MPS, // distance(m) / 1.1(m/s) → giây
-            };
+            storedRoutes = { driving: rDriving, motorbike: rMoto, cycling: rCycling };
 
-            // Lưu cả 3 để switch khi click row
-            storedRoutes = { driving: rDriving, motorbike: rMoto, foot: rWalking };
-
-            // ── Hiển thị kết quả ─────────────────────────────────────────────
-            updateRow('resDriving', 'timeCar', 'distCar', rDriving, 'driving');
-            updateRow('resMoto', 'timeMoto', 'distMoto', rMoto, 'motorbike');
-            updateRow('resFoot', 'timeFoot', 'distFoot', rWalking, 'foot');
+            // Hiển thị kết quả (Goong đã tính traffic → không cần nhân hệ số thêm)
+            fillRow('timeCar', 'distCar', rDriving);
+            fillRow('timeMoto', 'distMoto', rMoto);
+            fillRow('timeCycling', 'distCycling', rCycling);
 
             // Vẽ mặc định = ô tô
             activeMode = 'driving';
@@ -275,20 +266,15 @@ function initRouting(map) {
         }
     });
 
-    /**
-     * Điền thời gian + khoảng cách vào 1 row kết quả.
-     * duration OSRM × hệ số VN → thời gian thực tế ước tính.
-     */
-    function updateRow(rowId, timeId, distId, route, mode) {
-        const adjustedSec = route.duration * (TRAFFIC_FACTOR[mode] ?? 1.3);
-        setText(timeId, fmtTime(adjustedSec));
+    function fillRow(timeId, distId, route) {
+        setText(timeId, fmtTime(route.duration));
         setText(distId, fmtDist(route.distance));
     }
 
     // ── Xóa tuyến ─────────────────────────────────────────
     btnClear?.addEventListener('click', () => {
         clearRoute();
-        storedRoutes = { driving: null, motorbike: null, foot: null };
+        storedRoutes = { driving: null, motorbike: null, cycling: null };
         if (elResults) elResults.style.display = 'none';
         hideStatus();
         if (inpStart) inpStart.value = '';
@@ -298,22 +284,64 @@ function initRouting(map) {
     });
 
     // ─────────────────────────────────────────────────────
-    // OSRM Routing
+    // Goong Directions API — chính xác cho Việt Nam
+    // ─────────────────────────────────────────────────────
+    async function goongDirection(s, e, vehicle) {
+        const key = window.APP_CONFIG?.goongRestApiKey;
+        if (!key) return null;
+        try {
+            const url = `https://rsapi.goong.io/Direction?origin=${s.lat},${s.lng}`
+                + `&destination=${e.lat},${e.lng}&vehicle=${vehicle}&api_key=${key}`;
+            const data = await fetchJSON(url);
+            if (!data?.routes?.length) return null;
+            const route = data.routes[0];
+            const leg = route.legs?.[0];
+            if (!leg) return null;
+            return {
+                geometry: decodeOverviewPolyline(route.overview_polyline?.points),
+                distance: leg.distance?.value || 0,
+                duration: leg.duration?.value || 0,
+            };
+        } catch (err) {
+            console.warn('[ROUTE] Goong Direction fail:', err.message);
+            return null;
+        }
+    }
+
+    // Decode encoded polyline (Google format) → GeoJSON LineString
+    function decodeOverviewPolyline(encoded) {
+        if (!encoded) return { type: 'LineString', coordinates: [] };
+        var coords = [], idx = 0, lat = 0, lng = 0;
+        while (idx < encoded.length) {
+            var b, shift = 0, result = 0;
+            do { b = encoded.charCodeAt(idx++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+            lat += (result & 1) ? ~(result >> 1) : (result >> 1);
+            shift = 0; result = 0;
+            do { b = encoded.charCodeAt(idx++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+            lng += (result & 1) ? ~(result >> 1) : (result >> 1);
+            coords.push([lng / 1e5, lat / 1e5]);
+        }
+        return { type: 'LineString', coordinates: coords };
+    }
+
+    // ─────────────────────────────────────────────────────
+    // OSRM — fallback khi Goong lỗi
     // ─────────────────────────────────────────────────────
     async function osrm(s, e, profile) {
-        // OSRM không có profile "motorbike" — gọi 'driving' thay thế
         const p = profile === 'motorbike' ? 'driving' : profile;
         const url = `https://router.project-osrm.org/route/v1/${p}/${s.lng},${s.lat};${e.lng},${e.lat}`
             + `?overview=full&geometries=geojson`;
-        const data = await fetchJSON(url);
-        if (data?.code === 'Ok' && data.routes?.length) {
-            const r = data.routes[0];
-            return { geometry: r.geometry, distance: r.distance, duration: r.duration };
-        }
+        try {
+            const data = await fetchJSON(url);
+            if (data?.code === 'Ok' && data.routes?.length) {
+                const r = data.routes[0];
+                return { geometry: r.geometry, distance: r.distance, duration: r.duration };
+            }
+        } catch { }
         return null;
     }
 
-    // Nominatim fallback
+    // Nominatim fallback cho geocoding
     async function nominatim(q) {
         const biased = /đà nẵng|da nang|quảng nam|quang nam/i.test(q) ? q : `${q}, Đà Nẵng`;
         try {
