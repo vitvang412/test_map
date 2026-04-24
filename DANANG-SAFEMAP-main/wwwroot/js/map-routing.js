@@ -12,15 +12,16 @@ function waitForMap(cb, n = 0) {
     else { console.error('[ROUTE] MapInstance not found'); }
 }
 
-// ─── Hệ số hiệu chỉnh thời gian theo thực tế giao thông Việt Nam ───────────
+// ─── Hệ số hiệu chỉnh thời gian theo giao thông thực tế Đà Nẵng ────────────
 const TRAFFIC_FACTOR = {
-    driving: 1.40,   // ô tô bị kẹt hơn, hệ số lớn nhất
-    motorbike: 1.20,   // xe máy len lỏi nhanh hơn ô tô ~15-20%
-    foot: 1.15,   // đi bộ: cộng thêm hệ số đèn đỏ, vỉa hè hẹp VN
+    driving:   1.40,   // ô tô: kẹt xe TP, đèn đỏ, vòng xuyến
+    motorbike: 1.15,   // xe máy: len lỏi tốt hơn, ít kẹt
+    bicycle:   1.12,   // xe đạp: chậm hơn chút do đèn đỏ, vỉa hè
 };
 
-// Tốc độ đi bộ thực tế VN (~4 km/h), dùng để tính fallback khi OSRM foot lỗi
-const WALK_SPEED_MPS = 1.1; // m/s ≈ 3.96 km/h
+// Tốc độ xe máy trung bình tại TP Đà Nẵng (km/h → m/s)
+// Chưa tính traffic factor, sẽ nhân ở updateRow()
+const MOTO_BASE_SPEED_MPS = 35 / 3.6; // ≈ 9.72 m/s ~ 35 km/h
 
 function initRouting(map) {
 
@@ -41,7 +42,7 @@ function initRouting(map) {
     let coordStart = null, coordEnd = null;
     let startMarker = null, endMarker = null;
 
-    let storedRoutes = { driving: null, motorbike: null, foot: null };
+    let storedRoutes = { driving: null, motorbike: null, bicycle: null };
     let activeMode = 'driving';
 
     // ── Pre-fill khi mở từ Place Card ─────────────────────
@@ -176,7 +177,7 @@ function initRouting(map) {
     const ROW_MAP = [
         ['resDriving', 'driving'],
         ['resMoto', 'motorbike'],
-        ['resFoot', 'foot'],
+        ['resBicycle', 'bicycle'],
     ];
 
     ROW_MAP.forEach(([id, mode]) => {
@@ -211,41 +212,42 @@ function initRouting(map) {
         if (!coordEnd) { showStatus('Không tìm thấy điểm đến.', 'error'); return; }
 
         try {
-            // Gọi song song 2 profile: driving + foot
-            const [rDriving, rFoot] = await Promise.all([
+            // Gọi song song 2 profile OSRM: driving + bicycle
+            const [rDriving, rBicycle] = await Promise.all([
                 osrm(coordStart, coordEnd, 'driving'),
-                osrm(coordStart, coordEnd, 'foot'),
+                osrm(coordStart, coordEnd, 'bicycle'),
             ]);
-
-            console.log('[ROUTE] rDriving:', rDriving);
-            console.log('[ROUTE] rFoot:', rFoot);
 
             if (!rDriving) { showStatus('Không tìm được đường đi đường bộ.', 'error'); return; }
 
-            // ── Xe máy: dùng geometry ô tô, tính time riêng ──────────────
+            // ── Xe máy: dùng tuyến bicycle (đường 2 bánh), tính thời gian theo tốc độ xe máy
+            // OSRM bicycle cho geometry phù hợp xe 2 bánh (đi ngõ hẻm, đường nhỏ)
+            // nhưng tốc độ xe máy nhanh hơn xe đạp nhiều → tính lại duration
+            const motoGeometry = rBicycle ? rBicycle.geometry : rDriving.geometry;
+            const motoDistance = rBicycle ? rBicycle.distance : rDriving.distance;
             const rMoto = {
-                geometry: rDriving.geometry,
-                distance: rDriving.distance,
-                duration: rDriving.duration * 0.85, // Xe máy đi nhanh hơn ô tô lúc kẹt xe một chút
+                geometry: motoGeometry,
+                distance: motoDistance,
+                duration: motoDistance / MOTO_BASE_SPEED_MPS,
             };
 
-            // ── Đi bộ: OSRM foot public server hay trả về tốc độ ảo của ô tô ───────────────
-            // Nên chúng ta luôn ép tính thời gian đi bộ = Quãng đường / Tốc độ đi bộ thực tế
-            const footDistance = rFoot ? rFoot.distance : rDriving.distance;
-            const footGeometry = rFoot ? rFoot.geometry : rDriving.geometry;
-            const rWalking = {
-                geometry: footGeometry,
-                distance: footDistance,
-                duration: footDistance / WALK_SPEED_MPS, // distance(m) / 1.1(m/s) → giây
+            // ── Xe đạp: dùng trực tiếp OSRM bicycle (geometry + duration chuẩn)
+            // Nếu OSRM bicycle lỗi → fallback từ driving geometry + tốc độ xe đạp ~14 km/h
+            const bikeDistance = rBicycle ? rBicycle.distance : rDriving.distance;
+            const bikeGeometry = rBicycle ? rBicycle.geometry : rDriving.geometry;
+            const rBike = {
+                geometry: bikeGeometry,
+                distance: bikeDistance,
+                duration: rBicycle ? rBicycle.duration : bikeDistance / (14 / 3.6),
             };
 
             // Lưu cả 3 để switch khi click row
-            storedRoutes = { driving: rDriving, motorbike: rMoto, foot: rWalking };
+            storedRoutes = { driving: rDriving, motorbike: rMoto, bicycle: rBike };
 
             // ── Hiển thị kết quả ─────────────────────────────────────────────
             updateRow('resDriving', 'timeCar', 'distCar', rDriving, 'driving');
             updateRow('resMoto', 'timeMoto', 'distMoto', rMoto, 'motorbike');
-            updateRow('resFoot', 'timeFoot', 'distFoot', rWalking, 'foot');
+            updateRow('resBicycle', 'timeBicycle', 'distBicycle', rBike, 'bicycle');
 
             // Vẽ mặc định = ô tô
             activeMode = 'driving';
@@ -277,10 +279,10 @@ function initRouting(map) {
 
     /**
      * Điền thời gian + khoảng cách vào 1 row kết quả.
-     * duration OSRM × hệ số VN → thời gian thực tế ước tính.
+     * duration × hệ số giao thông VN → thời gian thực tế ước tính.
      */
     function updateRow(rowId, timeId, distId, route, mode) {
-        const adjustedSec = route.duration * (TRAFFIC_FACTOR[mode] ?? 1.3);
+        const adjustedSec = route.duration * (TRAFFIC_FACTOR[mode] ?? 1.2);
         setText(timeId, fmtTime(adjustedSec));
         setText(distId, fmtDist(route.distance));
     }
@@ -288,7 +290,7 @@ function initRouting(map) {
     // ── Xóa tuyến ─────────────────────────────────────────
     btnClear?.addEventListener('click', () => {
         clearRoute();
-        storedRoutes = { driving: null, motorbike: null, foot: null };
+        storedRoutes = { driving: null, motorbike: null, bicycle: null };
         if (elResults) elResults.style.display = 'none';
         hideStatus();
         if (inpStart) inpStart.value = '';
@@ -301,9 +303,7 @@ function initRouting(map) {
     // OSRM Routing
     // ─────────────────────────────────────────────────────
     async function osrm(s, e, profile) {
-        // OSRM không có profile "motorbike" — gọi 'driving' thay thế
-        const p = profile === 'motorbike' ? 'driving' : profile;
-        const url = `https://router.project-osrm.org/route/v1/${p}/${s.lng},${s.lat};${e.lng},${e.lat}`
+        const url = `https://router.project-osrm.org/route/v1/${profile}/${s.lng},${s.lat};${e.lng},${e.lat}`
             + `?overview=full&geometries=geojson`;
         const data = await fetchJSON(url);
         if (data?.code === 'Ok' && data.routes?.length) {
