@@ -483,7 +483,7 @@
     overflow: hidden;
     font-family: 'Be Vietnam Pro', system-ui, sans-serif;
     min-width: 200px;
-    max-width: 260px;
+    max-width: 300px;
     background: #fff;
 }
 .mapboxgl-popup-tip { border-top-color: #fff !important; }
@@ -513,6 +513,42 @@
 }
 .lp__acc { color: #3B82F6; font-size: 10px; margin-left: 4px; }
 @keyframes lpShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* Popup với hình ảnh vệ tinh */
+.lp--with-img { padding: 0; }
+.lp--with-img .lp__body { padding: 12px 14px 10px; }
+.lp__img-wrap {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    overflow: hidden;
+    background: #E2E8F0;
+}
+.lp__img-skeleton {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, #E2E8F0 25%, #CBD5E1 50%, #E2E8F0 75%);
+    background-size: 200% 100%;
+    animation: lpShimmer 1.3s infinite;
+}
+.lp__img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+.lp__img--loaded { opacity: 1; }
+.lp__img-badge {
+    position: absolute;
+    bottom: 6px; left: 6px;
+    display: flex; align-items: center; gap: 4px;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(4px);
+    color: #fff;
+    font-size: 10px; font-weight: 600;
+    padding: 3px 8px 3px 5px;
+    border-radius: 6px;
+    letter-spacing: 0.2px;
+}
 
 /* Route marker */
 .route-marker { cursor: default; }
