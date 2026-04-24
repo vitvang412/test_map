@@ -1,0 +1,586 @@
+/* ═══════════════════════════════════════════════════
+   MAP.CSS — DaNang SafeMap  (Google Maps style)
+   ═══════════════════════════════════════════════════ */
+
+/* ── Full-screen container ── */
+.gm-container {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 64px);
+    overflow: hidden;
+    font-family: 'Be Vietnam Pro', 'Inter', system-ui, sans-serif;
+}
+
+#map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+/* ════════════════════════════════════════
+   FLOATING PANEL
+════════════════════════════════════════ */
+.gm-panel {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 300;
+    width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+    /* Nằm trên bản đồ */
+}
+
+/* All cards inside panel have pointer-events */
+.gm-search-wrap,
+.gm-place-card,
+.gm-route-card {
+    pointer-events: all;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0,0,0,.04);
+    overflow: hidden;
+}
+
+/* ── SEARCH BAR ── */
+.gm-searchbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+}
+
+.gm-search-ico {
+    color: #5F6368;
+    flex-shrink: 0;
+}
+
+#mapSearchInput {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #1E293B;
+    font-family: inherit;
+    background: transparent;
+}
+
+#mapSearchInput::placeholder {
+    color: #9AA0A6;
+}
+
+#btnClearSearch {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9AA0A6;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    border-radius: 50%;
+    transition: color .15s, background .15s;
+}
+#btnClearSearch:hover { color: #5F6368; background: #F1F3F4; }
+
+/* ── DROPDOWN ── */
+.gm-dropdown {
+    border-top: 1px solid #F1F3F4;
+    overflow: hidden;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.gm-drop-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid #F8F9FA;
+    transition: background .12s;
+}
+.gm-drop-item:last-child { border-bottom: none; }
+.gm-drop-item:hover { background: #F8F9FA; }
+
+.gm-drop-item__ico {
+    color: #9AA0A6;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.gm-drop-item__main {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1E293B;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gm-drop-item__sub {
+    font-size: 11.5px;
+    color: #9AA0A6;
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Không tìm thấy */
+.gm-drop-empty {
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #9AA0A6;
+    text-align: center;
+}
+
+/* ── PLACE CARD (State 2) ── */
+.gm-place-card__photo {
+    width: 100%; height: 160px;
+    position: relative; background: #E8EAED;
+    overflow: hidden; flex-shrink: 0;
+}
+.gm-photo-skeleton {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, #F1F3F4 25%, #E8EAED 50%, #F1F3F4 75%);
+    background-size: 200% 100%;
+    animation: gmShimmer 1.5s infinite;
+}
+@keyframes gmShimmer { 0%{background-position: 200% 0;} 100%{background-position: -200% 0;} }
+#cardPlaceImg {
+    width: 100%; height: 100%;
+    object-fit: cover; opacity: 0;
+    transition: opacity 0.35s ease-in-out;
+}
+#cardPlaceImg.loaded { opacity: 1; }
+
+.gm-place-card__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 14px 10px;
+    border-bottom: 1px solid #F1F3F4;
+}
+
+.gm-back-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #5F6368;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    border-radius: 50%;
+    transition: background .15s;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.gm-back-btn:hover { background: #F1F3F4; color: #1E293B; }
+
+.gm-place-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1E293B;
+    line-height: 1.4;
+}
+
+.gm-place-addr {
+    font-size: 12px;
+    color: #606368;
+    margin-top: 2px;
+    line-height: 1.5;
+}
+
+.gm-place-coords {
+    font-size: 11px;
+    color: #9AA0A6;
+    padding: 4px 14px 6px;
+    font-variant-numeric: tabular-nums;
+}
+
+.gm-place-actions {
+    display: flex;
+    gap: 8px;
+    padding: 10px 14px 14px;
+}
+
+.gm-action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    transition: all .18s;
+}
+
+.gm-action-btn--primary {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, .3);
+}
+.gm-action-btn--primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, .45);
+}
+.gm-action-btn--outline {
+    background: #F1F3F4;
+    color: #3C4043;
+    border: 1px solid #E8EAED;
+}
+.gm-action-btn--outline:hover { background: #E8EAED; }
+
+/* ── ROUTE CARD (State 3) ── */
+.gm-route-card__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #F1F3F4;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1E293B;
+}
+
+.gm-swap-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #5F6368;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    border-radius: 50%;
+    transition: background .15s;
+}
+.gm-swap-btn:hover { background: #F1F3F4; }
+
+/* Route inputs */
+.gm-route-inputs {
+    padding: 10px 14px 0;
+}
+
+.gm-route-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gm-route-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.gm-route-dot--from {
+    background: #10B981;
+    border: 2px solid white;
+    box-shadow: 0 0 0 1.5px #10B981;
+}
+
+.gm-route-dot--to {
+    background: #EF4444;
+    border: 2px solid white;
+    box-shadow: 0 0 0 1.5px #EF4444;
+}
+
+.gm-route-connector {
+    width: 2px;
+    height: 14px;
+    background: linear-gradient(#10B981, #EF4444);
+    margin-left: 5px;
+    border-radius: 2px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+
+.gm-route-input-wrap {
+    flex: 1;
+    position: relative;
+}
+
+.gm-route-input {
+    width: 100%;
+    border: none;
+    border-bottom: 1.5px solid #E8EAED;
+    background: transparent;
+    font-size: 13px;
+    color: #1E293B;
+    outline: none;
+    font-family: inherit;
+    padding: 7px 32px 7px 0;
+    transition: border-color .2s;
+}
+.gm-route-input:focus { border-bottom-color: #10B981; }
+.gm-route-input::placeholder { color: #BDC1C6; }
+
+.gm-myloc-btn {
+    position: absolute;
+    right: 0; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none;
+    cursor: pointer; color: #9AA0A6;
+    padding: 4px; display: flex;
+    border-radius: 50%;
+    transition: color .15s, background .15s;
+}
+.gm-myloc-btn:hover { color: #10B981; background: #F0FDF4; }
+
+/* Suggestions dropdown cho route inputs */
+.gm-suggestions {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: -26px; right: 0;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.14);
+    border: 1px solid #E8EAED;
+    z-index: 1000;
+    max-height: 220px;
+    overflow-y: auto;
+    display: none;
+}
+
+.gm-sugg-item {
+    padding: 9px 12px;
+    display: flex; align-items: flex-start; gap: 9px;
+    cursor: pointer;
+    border-bottom: 1px solid #F8F9FA;
+    transition: background .12s;
+    font-size: 12.5px;
+}
+.gm-sugg-item:last-child{ border-bottom: none; }
+.gm-sugg-item:hover { background: #F0FDF4; }
+
+/* Mode selection */
+.gm-modes {
+    display: flex;
+    gap: 6px;
+    padding: 12px 14px 0;
+}
+
+.gm-mode {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 8px 4px;
+    border: 1.5px solid #E8EAED;
+    border-radius: 10px;
+    background: #F8F9FA;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    color: #5F6368;
+    transition: all .18s;
+}
+.gm-mode:hover { border-color: #10B981; color: #059669; background: #F0FDF4; }
+.gm-mode.active {
+    border-color: #10B981;
+    background: #ECFDF5;
+    color: #065F46;
+    font-weight: 700;
+}
+
+/* Find route button */
+.gm-route-actions {
+    padding: 12px 14px 0;
+}
+
+.gm-find-btn {
+    width: 100%;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 13.5px; font-weight: 700;
+    cursor: pointer; border: none;
+    font-family: inherit;
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(16, 185, 129, .3);
+    transition: all .2s;
+}
+.gm-find-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 18px rgba(16, 185, 129, .45);
+}
+
+/* Status */
+.gm-route-status {
+    margin: 8px 14px 0;
+    padding: 7px 10px;
+    border-radius: 8px;
+    font-size: 12.5px;
+}
+.gm-route-status--loading { background:#EFF6FF; color:#3B82F6; }
+.gm-route-status--error   { background:#FEF2F2; color:#DC2626; }
+
+/* Results */
+.gm-route-results {
+    margin: 10px 0 0;
+    border-top: 1px solid #F1F3F4;
+}
+
+.gm-result-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #F1F3F4;
+    cursor: pointer;
+    transition: background .12s;
+}
+.gm-result-row:hover { background: #F8F9FA; }
+.gm-result-row.active { background: #F0FDF4; }
+.gm-result-row:last-of-type { border-bottom: none; }
+
+.gm-result-icon { font-size: 18px; flex-shrink: 0; display: flex; align-items: center; color: #5F6368; }
+
+.gm-result-time { font-size: 14px; font-weight: 700; color: #1E293B; }
+.gm-result-dist { font-size: 11.5px; color: #9AA0A6; margin-top: 1px; }
+
+.gm-result-badge {
+    font-size: 10px; font-weight: 700;
+    background: #DCFCE7; color: #15803D;
+    padding: 2px 7px; border-radius: 10px;
+    margin-left: auto; flex-shrink: 0;
+}
+
+.gm-clear-btn {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    width: 100%;
+    padding: 8px;
+    background: #FEF2F2;
+    border: none;
+    color: #DC2626;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+    transition: background .15s;
+}
+.gm-clear-btn:hover { background: #FECACA; }
+
+/* ════════════════════════════════════════
+   GOONG POPUP — .lp
+════════════════════════════════════════ */
+.mapboxgl-popup-content {
+    border-radius: 10px !important;
+    box-shadow: 0 2px 16px rgba(0,0,0,.10), 0 0 0 1px rgba(0,0,0,.05) !important;
+    padding: 0 !important;
+    overflow: hidden;
+    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+    min-width: 200px;
+    max-width: 260px;
+    background: #fff;
+}
+.mapboxgl-popup-tip { border-top-color: #fff !important; }
+.mapboxgl-popup-close-button {
+    position: absolute; top:6px; right:6px;
+    width:22px; height:22px; border-radius:50%;
+    background:#F1F5F9; border:none;
+    font-size:15px; color:#94A3B8;
+    cursor:pointer; display:flex;
+    align-items:center; justify-content:center;
+    transition: background .15s, color .15s;
+    z-index:1; padding:0;
+}
+.mapboxgl-popup-close-button:hover { background:#E2E8F0; color:#475569; }
+
+.lp { padding:12px 14px 10px; background:#fff; }
+.lp__top { display:flex; align-items:flex-start; gap:8px; }
+.lp__pin { width:15px; height:18px; flex-shrink:0; margin-top:1px; }
+.lp__addr { font-size:13px; font-weight:500; color:#0F172A; line-height:1.5; }
+.lp__sub  { font-size:11px; color:#64748B; line-height:1.4; margin-top:2px; }
+.lp__divider { height:1px; background:#F1F5F9; margin:8px 0; }
+.lp__coords { display:flex; align-items:center; gap:4px; font-size:11px; color:#64748B; }
+.lp__skeleton--line {
+    height:11px; border-radius:4px;
+    background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+    background-size:200% 100%; animation:lpShimmer 1.3s infinite;
+}
+.lp__acc { color: #3B82F6; font-size: 10px; margin-left: 4px; }
+@keyframes lpShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* Route marker */
+.route-marker { cursor: default; }
+
+/* Goong controls position */
+.mapboxgl-ctrl-top-right { top: 60px; right: 10px; }
+.mapboxgl-ctrl-bottom-left { bottom: 30px; left: 10px; }
+
+/* ── NÚT LAYER TOGGLE (Góc phải dưới, như Google Maps) ── */
+.gm-layer-toggle {
+    position: fixed;
+    bottom: 100px;
+    right: 10px;
+    z-index: 9999;
+    width: 56px;
+    height: 56px;
+    background: #fff;
+    border-radius: 8px;
+    border: 2px solid rgba(0,0,0,0.15);
+    padding: 0;
+    cursor: pointer;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+    transition: box-shadow 0.15s, transform 0.15s;
+}
+.gm-layer-toggle:hover {
+    box-shadow: 0 3px 10px rgba(0,0,0,0.45);
+    transform: scale(1.04);
+}
+.gm-layer-toggle-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+.gm-layer-icon {
+    position: absolute;
+    inset: 0;
+    bottom: 18px;
+    /* Thumbnail vệ tinh Đà Nẵng (mặc định hiện ảnh vệ tinh vì đang ở chế độ bản đồ) */
+    background-image: url('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=108.19,16.04,108.23,16.07&bboxSR=4326&imageSR=4326&size=128,128&format=jpg&f=image');
+    background-size: cover;
+    background-position: center;
+    background-color: #c8d8c8;
+}
+.gm-layer-toggle.is-satellite .gm-layer-icon {
+    /* Khi đang vệ tinh thì thumbnail hiện bản đồ thường */
+    background-image: url('https://mt1.google.com/vt/lyrs=m&hl=vi&x=13010&y=7551&z=14');
+}
+.gm-layer-text {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 18px;
+    background: rgba(255,255,255,0.92);
+    font-size: 10px;
+    font-weight: 700;
+    color: #3C4043;
+    line-height: 18px;
+    text-align: center;
+    letter-spacing: 0.2px;
+    font-family: 'Be Vietnam Pro', 'Inter', system-ui, sans-serif;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .gm-panel {
+        width: calc(100vw - 24px);
+        top: 8px; left: 12px;
+    }
+}

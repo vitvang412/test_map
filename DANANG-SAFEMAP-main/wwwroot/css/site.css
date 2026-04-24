@@ -1,0 +1,12 @@
+/* site.css — minimal reset only. All design in dashboard.css */
+a {
+  text-decoration: none;
+}
+
+img {
+  display: block;
+}
+
+button {
+  cursor: pointer;
+}

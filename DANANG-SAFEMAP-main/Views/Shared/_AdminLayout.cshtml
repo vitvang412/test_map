@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Dashboard</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom Admin CSS -->
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body>
+
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <polyline points="9 12 11 14 15 10"/>
+                    </svg>
+                </div>
+                <h3>SafeMap Admin</h3>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="/Admin/Dashboard" class="active">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        Quản lý người dùng
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        Quản lý tin tức
+                    </a>
+                </li>
+                <li>
+                    <a href="/Admin/AlertModeration">
+                        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        Duyệt báo cáo sự cố
+                    </a>
+                </li>
+                <li>
+                    <a href="/Admin/AlertModeration">
+                        <svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+                        Quản lý sự cố bản đồ
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        Quản lý người lạc
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        Thống kê
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Page Content -->
+        <div id="content">
+            <!-- Top Navbar -->
+            <div class="top-navbar">
+                <div class="nav-left">
+                    <button class="btn btn-light d-md-none" id="sidebarCollapse">
+                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    </button>
+                    <h4 class="m-0 ms-3 d-none d-md-inline-block fw-bold" style="color: var(--primary);">@ViewData["Title"]</h4>
+                </div>
+
+                <div class="nav-right">
+                    <div class="dropdown">
+                        <div class="user-profile dropdown-toggle" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-info text-end d-none d-sm-block">
+                                <!-- Tên Admin được set bởi Javascript từ thông tin đăng nhập -->
+                                <p class="user-name" id="adminName">Admin</p>
+                                <p class="user-role">Quản trị viên</p>
+                            </div>
+                            <div class="user-avatar" id="adminAvatar">A</div>
+                        </div>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" aria-labelledby="dropdownMenuButton">
+                            <li><a class="dropdown-item" href="/">Về trang chủ</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <!-- Form gọi POST lên backend Logout (HttpContext.SignOutAsync) -->
+                                <form id="logoutForm" asp-controller="Admin" asp-action="Logout" method="post" class="m-0">
+                                    <button type="submit" class="dropdown-item text-danger w-100 text-start" id="btnLogout">Đăng xuất</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Render Body -->
+            <div class="main-content">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Toggle Sidebar on mobile
+        document.getElementById('sidebarCollapse').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
+        // Load Header Admin info from LocalStorage
+        document.addEventListener("DOMContentLoaded", function() {
+            try {
+                const userJson = localStorage.getItem("user");
+                if (userJson) {
+                    const user = JSON.parse(userJson);
+                    if (user.role === 'Admin') {
+                        document.getElementById("adminName").innerText = user.fullName || "Admin";
+                        document.getElementById("adminAvatar").innerText = (user.fullName || "A").charAt(0).toUpperCase();
+                    } else {
+                        // Not an admin, security redirect back to homepage
+                        window.location.href = "/";
+                    }
+                } else {
+                    window.location.href = "/Auth/Login";
+                }
+            } catch (e) {
+                console.error("Local storage error");
+            }
+        });
+
+        // Intercept Logout logic: clear frontend state then perform the standard backend form submit
+        document.getElementById("btnLogout").addEventListener("click", function(e) {
+            e.preventDefault();
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            
+            // Delete frontend cookies just to be completely safe even though backend handles it
+            document.cookie = "jwtToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+            // Gửi request POST lên backend Admin/Logout (SignInManager/HttpContext.SignOut)
+            document.getElementById("logoutForm").submit();
+        });
+    </script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - DaNang SafeMap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+</head>
+<body>
+
+    <!-- ══════════ NAVBAR ══════════ -->
+    <nav class="dsm-nav">
+        <div class="dsm-nav__inner">
+            <!-- Brand -->
+            <a class="dsm-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                <div class="dsm-brand__icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <polyline points="9 12 11 14 15 10"/>
+                    </svg>
+                </div>
+                <div class="dsm-brand__name">
+                    DaNang SafeMap
+                    <span>Hệ thống bản đồ an ninh</span>
+                </div>
+            </a>
+
+            <!-- Nav links -->
+            <ul class="dsm-nav__links">
+                <li>
+                    <a asp-area="" asp-controller="Home" asp-action="Index">
+                        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        Trang chủ
+                    </a>
+                </li>
+                <li>
+                    <a asp-area="" asp-controller="Map" asp-action="Index">
+                        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        Bản đồ
+                    </a>
+                </li>
+                <li>
+                    <a asp-area="" asp-controller="Article" asp-action="Index">
+                        <svg viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/></svg>
+                        Tin tức
+                    </a>
+                </li>
+                <li>
+                    <a asp-area="" asp-controller="MissingPerson" asp-action="Index">
+                        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        Tìm người
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Right: Login button or User menu (rendered by JS) -->
+            <div class="dsm-nav__right">
+                <!-- Login button — hiện khi chưa đăng nhập -->
+                <a href="/Auth/Login" class="nav-login-btn" id="navLoginBtn" style="display:none;">
+                    Đăng Nhập
+                </a>
+
+                <!-- User menu — hiện khi đã đăng nhập -->
+                <div class="user-menu" id="userMenu" style="display:none;">
+                    <button class="user-trigger" id="userTrigger" type="button" aria-label="Menu người dùng">
+                        <div class="user-avatar" id="userAvatar">?</div>
+                        <span class="user-name" id="userName">Người dùng</span>
+                        <svg class="user-chevron" viewBox="0 0 24 24">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-header">
+                            <div class="dh-name" id="dropdownName">Người dùng</div>
+                            <div class="dh-email" id="dropdownEmail">-</div>
+                        </div>
+                        <a href="/Auth/Profile" class="dropdown-item">
+                            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            Trang cá nhân
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item danger" id="logoutBtn" type="button">
+                            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            Đăng xuất
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ══════════ MAIN CONTENT ══════════ -->
+    <div class="page-content">
+        @RenderBody()
+    </div>
+
+    <script>
+    // ── Auth state from localStorage ──────────────────────────────────────
+    (function () {
+        try {
+            var raw  = localStorage.getItem('user');
+            var user = raw ? JSON.parse(raw) : null;
+
+            if (user && (user.fullName || user.email)) {
+                // Đã đăng nhập
+                var name   = user.fullName || user.email.split('@@')[0];
+                var email  = user.email || '';
+                var initials = name.charAt(0).toUpperCase();
+
+                document.getElementById('userAvatar').textContent   = initials;
+                document.getElementById('userName').textContent     = name;
+                document.getElementById('dropdownName').textContent  = name;
+                document.getElementById('dropdownEmail').textContent = email;
+
+                document.getElementById('navLoginBtn').style.display = 'none';
+                document.getElementById('userMenu').style.display    = 'flex';
+            } else {
+                // Chưa đăng nhập
+                document.getElementById('navLoginBtn').style.display = 'flex';
+                document.getElementById('userMenu').style.display    = 'none';
+            }
+        } catch (e) {
+            document.getElementById('navLoginBtn').style.display = 'flex';
+        }
+    })();
+
+    // ── Toggle dropdown ───────────────────────────────────────────────────
+    var trigger  = document.getElementById('userTrigger');
+    var menu     = document.getElementById('userMenu');
+    if (trigger) {
+        trigger.addEventListener('click', function (e) {
+            e.stopPropagation();
+            menu.classList.toggle('open');
+        });
+        document.addEventListener('click', function () {
+            menu.classList.remove('open');
+        });
+    }
+
+    // ── Logout ────────────────────────────────────────────────────────────
+    var logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function () {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/Auth/Login';
+        });
+    }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

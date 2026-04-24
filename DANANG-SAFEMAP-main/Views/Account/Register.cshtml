@@ -1,0 +1,442 @@
+@{
+    ViewData["Title"] = "Đăng Ký";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng Ký - DaNang SafeMap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --green:     #2D6A4F;
+            --green-d:   #1B4332;
+            --green-h:   #245c44;
+            --left-bg:   #E2EDE5;
+            --warm-bg:   #F9F8F3;
+            --blob1:     #B7D9BC;
+            --blob2:     #F4A261;
+            --blob3:     #90CAF9;
+            --text:      #1C2B1E;
+            --muted:     #5C6B5E;
+            --border:    #D4DDD6;
+            --inp-bg:    #F2F5F2;
+        }
+
+        /* Full viewport, no scroll */
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            display: flex;
+            height: 100vh;
+            background: var(--warm-bg);
+            color: var(--text);
+        }
+
+        /* ══ LEFT 50% ══ */
+        .left {
+            width: 50%;
+            background: var(--left-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .blob { position: absolute; border-radius: 50%; pointer-events: none; }
+        .b1 { width: 280px; height: 280px; background: var(--blob1); top: -100px; left: -100px; opacity: .55; }
+        .b2 { width: 150px; height: 150px; background: var(--blob2); top: 50px; right: 20px; opacity: .30; }
+        .b3 { width: 220px; height: 220px; background: var(--blob1); bottom: -60px; left: -30px; opacity: .45; }
+        .b4 { width: 120px; height: 120px; background: var(--blob3); bottom: 40px; right: -30px; opacity: .28; }
+
+
+
+        .left-inner { position: relative; z-index: 1; width: 100%; max-width: 340px; }
+
+        .logo-box {
+            width: 64px; height: 64px;
+            background: var(--green);
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 22px;
+            box-shadow: 0 10px 28px rgba(45,106,79,.30);
+        }
+        .logo-box svg { width: 32px; height: 32px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        .brand-h { font-size: 24px; font-weight: 700; line-height: 1.3; margin-bottom: 8px; }
+        .brand-h span { color: var(--green); }
+        .brand-p { font-size: 13px; color: var(--muted); line-height: 1.65; margin-bottom: 26px; }
+
+        /* Steps */
+        .steps { display: flex; flex-direction: column; }
+        .step { display: flex; gap: 13px; }
+        .step-line { display: flex; flex-direction: column; align-items: center; }
+        .step-dot {
+            width: 30px; height: 30px; border-radius: 50%;
+            background: var(--green); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700; flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(45,106,79,.28);
+        }
+        .step-conn { width: 2px; height: 24px; background: #95D5B2; margin: 4px 0; }
+        .step-body { padding-top: 4px; }
+        .step-body h4 { font-size: 13px; font-weight: 600; }
+        .step-body p  { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+
+        /* ══ RIGHT 50% — perfectly centered, no scroll ══ */
+        .right {
+            width: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 36px;
+            background: var(--warm-bg);
+        }
+
+        /* Floating card */
+        .card {
+            width: 100%;
+            max-width: 420px;
+            background: #fff;
+            border-radius: 26px;
+            padding: 28px 32px;
+            box-shadow: 0 10px 48px rgba(0,0,0,.13), 0 2px 8px rgba(0,0,0,.06);
+        }
+
+        .card-title { font-size: 23px; font-weight: 700; text-align: center; margin-bottom: 3px; }
+        .card-sub   { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 18px; }
+
+        /* Error */
+        .err-box {
+            display: none; align-items: center; gap: 8px;
+            background: #FEF2F2; border: 1px solid #FECACA;
+            border-radius: 9px; padding: 9px 13px;
+            font-size: 12.5px; color: #DC2626; margin-bottom: 12px;
+        }
+        .err-box svg { width: 14px; height: 14px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* Fields */
+        .field { margin-bottom: 11px; }
+        .field label { display: block; font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+        .req { color: #DC2626; }
+
+        .row2 { display: flex; gap: 10px; }
+        .row2 .field { flex: 1; }
+
+        .inp-wrap {
+            display: flex; align-items: center;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            background: var(--inp-bg);
+            transition: border-color .2s, box-shadow .2s, background .2s;
+        }
+        .inp-wrap:focus-within {
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px rgba(45,106,79,.11);
+            background: #fff;
+        }
+        .inp-ico { padding: 0 10px; display: flex; align-items: center; }
+        .inp-ico svg { width: 14px; height: 14px; stroke: #8FA892; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .inp-wrap input, .inp-wrap select {
+            flex: 1; border: none; background: transparent;
+            padding: 9px 9px 9px 0;
+            font-size: 13px; font-family: inherit; color: var(--text); outline: none;
+        }
+        .inp-wrap input::placeholder { color: #A8B8AA; }
+        .inp-wrap select { cursor: pointer; font-size: 13px; }
+        .eye-btn {
+            padding: 0 10px; cursor: pointer; background: none; border: none;
+            display: flex; align-items: center; color: #8FA892; transition: color .2s;
+        }
+        .eye-btn:hover { color: var(--green); }
+        .eye-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* Password strength */
+        .pw-bars { display: flex; gap: 3px; margin-top: 5px; }
+        .pw-bar { flex: 1; height: 3px; border-radius: 2px; background: var(--border); transition: background .3s; }
+        .pw-bar.weak   { background: #EF4444; }
+        .pw-bar.medium { background: #F59E0B; }
+        .pw-bar.strong { background: var(--green); }
+        .pw-hint { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+
+        /* Terms */
+        .terms { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 13px; }
+        .terms input { width: 14px; height: 14px; accent-color: var(--green); cursor: pointer; margin-top: 2px; flex-shrink: 0; }
+        .terms label { font-size: 11.5px; color: var(--muted); cursor: pointer; line-height: 1.5; }
+        .terms a { color: var(--green); font-weight: 600; text-decoration: none; }
+        .terms a:hover { color: var(--green-d); }
+
+        /* Buttons */
+        .btn-main {
+            width: 100%; padding: 11px;
+            background: linear-gradient(135deg, var(--green) 0%, #1B5E3B 100%);
+            color: #fff;
+            border: none; border-radius: 11px;
+            font-size: 14px; font-weight: 700; font-family: inherit;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            transition: opacity .2s, transform .15s, box-shadow .2s;
+            box-shadow: 0 4px 18px rgba(45,106,79,.36);
+        }
+        .btn-main:hover { opacity: .92; box-shadow: 0 7px 24px rgba(45,106,79,.44); transform: translateY(-1px); }
+        .btn-main:active { transform: translateY(0); }
+        .btn-main:disabled { opacity: .65; cursor: not-allowed; transform: none; }
+        .btn-main svg { width: 15px; height: 15px; }
+
+        .divider { display: flex; align-items: center; gap: 10px; margin: 13px 0; font-size: 11.5px; color: #A8B8AA; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        .btn-google {
+            width: 100%; padding: 10px;
+            border: 1.5px solid var(--border); border-radius: 11px; background: #fff;
+            font-size: 13px; font-weight: 600; font-family: inherit;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px;
+            color: var(--text); transition: border-color .2s, background .2s, box-shadow .2s;
+            margin-bottom: 14px;
+        }
+        .btn-google:hover { border-color: #B8C8BA; background: var(--inp-bg); box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+        .btn-google img { width: 17px; height: 17px; }
+
+        .bottom-link { text-align: center; font-size: 13px; color: var(--muted); }
+        .bottom-link a { color: var(--green); font-weight: 700; text-decoration: none; transition: color .2s; }
+        .bottom-link a:hover { color: var(--green-d); }
+
+        @@media (max-width: 860px) {
+            html, body { overflow: auto; height: auto; }
+            .left { display: none; }
+            .right { width: 100%; padding: 28px 16px; }
+            .row2 { flex-direction: column; gap: 0; }
+        }
+        @@keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<!-- LEFT 50% -->
+<div class="left">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="blob b4"></div>
+
+
+    <div class="left-inner">
+        <div class="logo-box">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9 12 11 14 15 10"/>
+            </svg>
+        </div>
+        <h1 class="brand-h">Tham gia cùng<br><span>DaNang SafeMap</span></h1>
+        <p class="brand-p">Chỉ mất 1 phút để tạo tài khoản và bắt đầu bảo vệ cộng đồng của bạn.</p>
+        <div class="steps">
+            <div class="step">
+                <div class="step-line">
+                    <div class="step-dot">1</div>
+                    <div class="step-conn"></div>
+                </div>
+                <div class="step-body"><h4>Điền thông tin cá nhân</h4><p>Họ tên, email và mật khẩu</p></div>
+            </div>
+            <div class="step">
+                <div class="step-line">
+                    <div class="step-dot">2</div>
+                    <div class="step-conn"></div>
+                </div>
+                <div class="step-body"><h4>Xác nhận tài khoản</h4><p>Kiểm tra email để xác nhận</p></div>
+            </div>
+            <div class="step">
+                <div class="step-line">
+                    <div class="step-dot">3</div>
+                </div>
+                <div class="step-body"><h4>Bắt đầu sử dụng</h4><p>Truy cập bản đồ và cộng đồng</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- RIGHT 50% — centered, no scroll -->
+<div class="right">
+    <div class="card">
+        <h2 class="card-title">Tạo Tài Khoản</h2>
+        <p class="card-sub">Miễn phí và chỉ mất vài giây</p>
+
+        <div class="err-box" id="errBox">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="errText"></span>
+        </div>
+
+        <form id="regForm" novalidate>
+            <!-- Họ tên -->
+            <div class="field">
+                <label>Họ và tên <span class="req">*</span></label>
+                <div class="inp-wrap">
+                    <span class="inp-ico"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                    <input type="text" id="fullName" placeholder="Nguyễn Văn A" required />
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="field">
+                <label>Email <span class="req">*</span></label>
+                <div class="inp-wrap">
+                    <span class="inp-ico"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+                    <input type="email" id="email" placeholder="email@example.com" required />
+                </div>
+            </div>
+
+            <!-- Ngày sinh + Giới tính -->
+            <div class="row2">
+                <div class="field">
+                    <label>Ngày sinh</label>
+                    <div class="inp-wrap">
+                        <span class="inp-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+                        <input type="date" id="dob" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Giới tính</label>
+                    <div class="inp-wrap">
+                        <span class="inp-ico"><svg viewBox="0 0 24 24"><circle cx="10" cy="14" r="5"/><path d="M10 9V3m-3 3 3-3 3 3"/><path d="M17 4h3m0 0v3m0-3-4 4"/></svg></span>
+                        <select id="gender">
+                            <option value="">Chọn...</option>
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Địa chỉ -->
+            <div class="field">
+                <label>Địa chỉ</label>
+                <div class="inp-wrap">
+                    <span class="inp-ico"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+                    <input type="text" id="address" placeholder="Đà Nẵng, Việt Nam" />
+                </div>
+            </div>
+
+            <!-- Mật khẩu -->
+            <div class="field">
+                <label>Mật khẩu <span class="req">*</span></label>
+                <div class="inp-wrap">
+                    <span class="inp-ico"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                    <input type="password" id="password" placeholder="Tối thiểu 6 ký tự" required />
+                    <button type="button" class="eye-btn" id="eye1"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                </div>
+                <div class="pw-bars"><div class="pw-bar" id="b1"></div><div class="pw-bar" id="b2"></div><div class="pw-bar" id="b3"></div><div class="pw-bar" id="b4"></div></div>
+                <div class="pw-hint" id="pwHint"></div>
+            </div>
+
+            <!-- Xác nhận mật khẩu -->
+            <div class="field">
+                <label>Xác nhận mật khẩu <span class="req">*</span></label>
+                <div class="inp-wrap">
+                    <span class="inp-ico"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                    <input type="password" id="confirm" placeholder="Nhập lại mật khẩu" required />
+                    <button type="button" class="eye-btn" id="eye2"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                </div>
+            </div>
+
+            <!-- Terms -->
+            <div class="terms">
+                <input type="checkbox" id="terms" />
+                <label for="terms">Tôi đồng ý với <a href="#">Điều khoản sử dụng</a> và <a href="#">Chính sách bảo mật</a></label>
+            </div>
+
+            <button type="submit" class="btn-main" id="regBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                Tạo Tài Khoản
+            </button>
+        </form>
+
+        <div class="divider">hoặc</div>
+
+        <button class="btn-google" id="googleBtn" type="button">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" />
+            Tiếp tục với Google
+        </button>
+
+        <p class="bottom-link">Đã có tài khoản? <a href="/Auth/Login">Đăng nhập</a></p>
+    </div>
+</div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<div id="g_id_onload"
+     data-client_id="722188859539-7sok1al7bcujbj4fb7c97urknrcs4d48.apps.googleusercontent.com"
+     data-callback="handleGoogle"
+     data-auto_prompt="false">
+</div>
+
+<script>
+function makeEye(btnId, inpId) {
+    const btn = document.getElementById(btnId), inp = document.getElementById(inpId);
+    btn.addEventListener('click', () => {
+        const show = inp.type === 'password'; inp.type = show ? 'text' : 'password';
+        btn.querySelector('svg').innerHTML = show
+            ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+            : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    });
+}
+makeEye('eye1','password'); makeEye('eye2','confirm');
+
+document.getElementById('password').addEventListener('input', function () {
+    const v = this.value; let s = 0;
+    if (v.length >= 6) s++; if (v.length >= 10) s++;
+    if (/[A-Z]/.test(v) && /[0-9]/.test(v)) s++;
+    if (/[^A-Za-z0-9]/.test(v)) s++;
+    const cls = ['','weak','medium','strong','strong'];
+    const lbl = ['','Yếu','Trung bình','Mạnh','Rất mạnh'];
+    ['b1','b2','b3','b4'].forEach((id,i) => { document.getElementById(id).className = 'pw-bar' + (i < s ? ' ' + cls[s] : ''); });
+    document.getElementById('pwHint').textContent = v.length ? lbl[s] : '';
+});
+
+function showErr(msg) { document.getElementById('errText').textContent = msg; document.getElementById('errBox').style.display = 'flex'; }
+function hideErr() { document.getElementById('errBox').style.display = 'none'; }
+
+document.getElementById('regForm').addEventListener('submit', async e => {
+    e.preventDefault(); hideErr();
+    const pw = document.getElementById('password').value, cpw = document.getElementById('confirm').value;
+    if (pw !== cpw) { showErr('Mật khẩu xác nhận không khớp'); return; }
+    if (!document.getElementById('terms').checked) { showErr('Vui lòng đồng ý với điều khoản sử dụng'); return; }
+    const btn = document.getElementById('regBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<svg style="animation:spin 1s linear infinite;stroke:white;fill:none;stroke-width:2" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Đang tạo tài khoản...';
+    try {
+        const res = await fetch('/api/account/register', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fullName: document.getElementById('fullName').value, email: document.getElementById('email').value, password: pw, confirmPassword: cpw, dateOfBirth: document.getElementById('dob').value || null, gender: document.getElementById('gender').value || null, address: document.getElementById('address').value || null })
+        });
+        const data = await res.json();
+        if (data.success) { localStorage.setItem('token', data.token); localStorage.setItem('user', JSON.stringify(data.user)); window.location.href = '/'; }
+        else showErr(data.message || 'Đăng ký thất bại');
+    } catch { showErr('Không thể kết nối đến máy chủ'); }
+    finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg> Tạo Tài Khoản';
+    }
+});
+
+document.getElementById('googleBtn').addEventListener('click', () => google.accounts.id.prompt());
+async function handleGoogle(response) {
+    try {
+        const res = await fetch('/api/account/google-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken: response.credential }) });
+        const data = await res.json();
+        if (data.success) { localStorage.setItem('token', data.token); localStorage.setItem('user', JSON.stringify(data.user)); window.location.href = '/'; }
+        else showErr(data.message || 'Đăng nhập Google thất bại');
+    } catch { showErr('Không thể kết nối đến máy chủ'); }
+}
+</script>
+</body>
+</html>

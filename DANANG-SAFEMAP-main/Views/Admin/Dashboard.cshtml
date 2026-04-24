@@ -1,0 +1,82 @@
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="fw-bold mb-0">Danh sách Người dùng</h5>
+</div>
+
+<div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="min-width: 800px;">
+                <thead class="text-muted" style="background-color: #f8f9fa;">
+                    <tr>
+                        <th class="border-0 rounded-start ps-4 py-3" scope="col">Họ và Tên</th>
+                        <th class="border-0 py-3" scope="col">Email</th>
+                        <th class="border-0 py-3" scope="col">Vai trò</th>
+                        <th class="border-0 py-3 rounded-end" scope="col">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px; font-weight: 600;">P</div>
+                                <div>
+                                    <h6 class="mb-0 fw-semibold text-dark">Phú Đỗ</h6>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3">admin@safemap.vn</td>
+                        <td class="py-3"><span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-semibold border border-primary-subtle" style="color: var(--primary) !important; background-color: var(--hover-bg) !important;">Admin</span></td>
+                        <td class="py-3"><span class="text-success fw-medium">● Hoạt động</span></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px; font-weight: 600;">H</div>
+                                <div>
+                                    <h6 class="mb-0 fw-semibold text-dark">Hoa Lê</h6>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3">hoale@example.com</td>
+                        <td class="py-3"><span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-2 fw-semibold">User</span></td>
+                        <td class="py-3"><span class="text-success fw-medium">● Hoạt động</span></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px; font-weight: 600;">N</div>
+                                <div>
+                                    <h6 class="mb-0 fw-semibold text-dark">Nhật Trường</h6>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3">nhattruong@example.com</td>
+                        <td class="py-3"><span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-2 fw-semibold">User</span></td>
+                        <td class="py-3"><span class="text-muted fw-medium">○ Hạn chế</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<nav aria-label="Page navigation" class="mt-4">
+  <ul class="pagination justify-content-end border-0">
+    <li class="page-item disabled">
+      <a class="page-link shadow-sm border-0 bg-white me-2" href="#" tabindex="-1" aria-disabled="true" style="border-radius: 8px;">Trước</a>
+    </li>
+    <li class="page-item"><a class="page-link shadow-sm border-0 border me-2 text-white text-center fw-medium" href="#" style="border-radius: 8px; background-color: var(--primary); width: 38px;">1</a></li>
+    <li class="page-item"><a class="page-link shadow-sm border-0 text-dark bg-white me-2 text-center" href="#" style="border-radius: 8px; width: 38px;">2</a></li>
+    <li class="page-item"><a class="page-link shadow-sm border-0 text-dark bg-white me-2 text-center" href="#" style="border-radius: 8px; width: 38px;">3</a></li>
+    <li class="page-item">
+      <a class="page-link shadow-sm border-0 text-dark bg-white" href="#" style="border-radius: 8px;">Sau</a>
+    </li>
+  </ul>
+</nav>

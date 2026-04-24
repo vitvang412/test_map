@@ -1,0 +1,247 @@
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+}
+
+<div class="profile-page">
+
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-avatar-lg" id="profileAvatarLg" title="Thay đổi ảnh đại diện">
+            <span id="profileInitials">U</span>
+            <div class="avatar-edit-overlay">
+                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </div>
+        </div>
+        <div class="profile-info">
+            <h2 id="profileDisplayName">Người dùng</h2>
+            <p id="profileEmail">user@example.com</p>
+            <div class="profile-badge">
+                <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Tài khoản đã xác thực
+            </div>
+        </div>
+    </div>
+
+    <!-- Personal Info Card -->
+    <div class="profile-card">
+        <div class="profile-card__header">
+            <div class="profile-card__title">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Thông tin cá nhân
+            </div>
+        </div>
+        <div class="profile-card__body">
+            <form id="profileForm" novalidate>
+                <div class="pf-grid">
+
+                    <div class="pf-field">
+                        <label class="pf-label" for="pf-fullname">Họ và tên <span>*</span></label>
+                        <div class="pf-input-wrap">
+                            <span class="pf-ico">
+                                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </span>
+                            <input type="text" id="pf-fullname" placeholder="Nguyễn Văn A" autocomplete="name" />
+                        </div>
+                    </div>
+
+                    <div class="pf-field">
+                        <label class="pf-label" for="pf-email">Email</label>
+                        <div class="pf-input-wrap readonly">
+                            <span class="pf-ico">
+                                <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            </span>
+                            <input type="email" id="pf-email" readonly />
+                        </div>
+                        <span class="pf-hint">Email không thể thay đổi</span>
+                    </div>
+
+                    <div class="pf-field">
+                        <label class="pf-label" for="pf-phone">Số điện thoại</label>
+                        <div class="pf-input-wrap">
+                            <span class="pf-ico">
+                                <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.57 3.35 2 2 0 0 1 3.53 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6.09 6.09l.88-.88a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            </span>
+                            <input type="tel" id="pf-phone" placeholder="0901 234 567" autocomplete="tel" />
+                        </div>
+                    </div>
+
+                    <div class="pf-field">
+                        <label class="pf-label" for="pf-dob">Ngày sinh</label>
+                        <div class="pf-input-wrap">
+                            <span class="pf-ico">
+                                <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            </span>
+                            <input type="date" id="pf-dob" />
+                        </div>
+                    </div>
+
+                    <div class="pf-field span2">
+                        <label class="pf-label" for="pf-address">Địa chỉ</label>
+                        <div class="pf-input-wrap">
+                            <span class="pf-ico">
+                                <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            </span>
+                            <input type="text" id="pf-address" placeholder="123 Nguyễn Văn Linh, Đà Nẵng" autocomplete="street-address" />
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="pf-actions">
+                    <button type="button" class="btn-cancel" onclick="loadProfile()">
+                        Đặt lại
+                    </button>
+                    <button type="submit" class="btn-save" id="btnSaveProfile">
+                        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Card -->
+    <div class="profile-card" id="security">
+        <div class="profile-card__header">
+            <div class="profile-card__title">
+                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Bảo mật tài khoản
+            </div>
+        </div>
+        <div class="profile-card__body">
+            <form id="pwForm" novalidate>
+                <div class="pf-grid">
+
+                    <div class="pf-field span2">
+                        <label class="pf-label" for="pf-curpw">Mật khẩu hiện tại <span>*</span></label>
+                        <div class="pf-input-wrap">
+                            <span class="pf-ico">
+                                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </span>
+                            <input type="password" id="pf-curpw" placeholder="••••••••" />
+                        </div>
+                    </div>
+
+                    <div class="pf-field">
+                        <label class="pf-label" for="pf-newpw">Mật khẩu mới <span>*</span></label>
+                        <div class="pf-input-wrap">
+                            <span class="pf-ico">
+                                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </span>
+                            <input type="password" id="pf-newpw" placeholder="Tối thiểu 8 ký tự" />
+                        </div>
+                    </div>
+
+                    <div class="pf-field">
+                        <label class="pf-label" for="pf-cfpw">Xác nhận mật khẩu <span>*</span></label>
+                        <div class="pf-input-wrap">
+                            <span class="pf-ico">
+                                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </span>
+                            <input type="password" id="pf-cfpw" placeholder="Nhập lại mật khẩu mới" />
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="pf-actions">
+                    <button type="submit" class="btn-save" id="btnSavePw">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Đổi mật khẩu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="profile-card">
+        <div class="profile-card__header">
+            <div class="profile-card__title" style="color:#DC2626">
+                <svg viewBox="0 0 24 24" style="stroke:#DC2626"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Vùng nguy hiểm
+            </div>
+        </div>
+        <div class="profile-card__body">
+            <p style="font-size:14px;color:var(--muted);margin-bottom:16px;">
+                Đăng xuất khỏi tất cả thiết bị hoặc xóa tài khoản. Hành động xóa tài khoản không thể hoàn tác.
+            </p>
+            <div class="pf-actions" style="justify-content:flex-start;">
+                <button type="button" class="btn-cancel danger-out" id="btnLogout"
+                    style="border-color:#FECACA;color:#DC2626;"
+                    onmouseover="this.style.background='#FEF2F2'" onmouseout="this.style.background=''">
+                    <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Đăng xuất
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+<script>
+(function() {
+    /* ── Load user from localStorage ── */
+    function getInitials(name) {
+        if (!name) return 'U';
+        return name.trim().split(' ').map(w => w[0]).slice(-2).join('').toUpperCase();
+    }
+
+    function loadProfile() {
+        const userRaw = localStorage.getItem('user');
+        if (!userRaw) { window.location.href = '/Auth/Login'; return; }
+        try {
+            const user = JSON.parse(userRaw);
+            const displayName = user.fullName || user.username || user.email || 'Người dùng';
+            document.getElementById('profileInitials').textContent = getInitials(displayName);
+            document.getElementById('profileDisplayName').textContent = displayName;
+            document.getElementById('profileEmail').textContent = user.email || '';
+            document.getElementById('pf-fullname').value = displayName;
+            document.getElementById('pf-email').value = user.email || '';
+            document.getElementById('pf-phone').value = user.phone || '';
+            document.getElementById('pf-address').value = user.address || '';
+            document.getElementById('pf-dob').value = user.dob || '';
+        } catch(e) { window.location.href = '/Auth/Login'; }
+    }
+
+    window.loadProfile = loadProfile;
+    loadProfile();
+
+    /* ── Save personal info ── */
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const userRaw = localStorage.getItem('user');
+        if (!userRaw) return;
+        try {
+            const user = JSON.parse(userRaw);
+            user.fullName = document.getElementById('pf-fullname').value.trim();
+            user.phone    = document.getElementById('pf-phone').value.trim();
+            user.address  = document.getElementById('pf-address').value.trim();
+            user.dob      = document.getElementById('pf-dob').value;
+            localStorage.setItem('user', JSON.stringify(user));
+            loadProfile();
+            if (window.showToast) window.showToast('Đã lưu thông tin cá nhân!');
+        } catch(e) {}
+    });
+
+    /* ── Change password (frontend stub) ── */
+    document.getElementById('pwForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const newPw = document.getElementById('pf-newpw').value;
+        const cfPw  = document.getElementById('pf-cfpw').value;
+        if (newPw.length < 8) { alert('Mật khẩu phải có ít nhất 8 ký tự'); return; }
+        if (newPw !== cfPw) { alert('Mật khẩu xác nhận không khớp'); return; }
+        if (window.showToast) window.showToast('Tính năng đổi mật khẩu sẽ kết nối API sau!');
+        document.getElementById('pwForm').reset();
+    });
+
+    /* ── Logout ── */
+    document.getElementById('btnLogout').addEventListener('click', function() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/Auth/Login';
+    });
+})();
+</script>
+}

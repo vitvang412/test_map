@@ -1,0 +1,318 @@
+﻿@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<div class="dsm-page">
+
+    <!-- ══════════════ HERO ══════════════ -->
+    <section class="hero">
+        <div class="hero__bg"></div>
+        <div class="hero__overlay"></div>
+        <div class="hero__content">
+            <div class="hero__badge">
+                <span></span>
+                HỆ THỐNG HOẠT ĐỘNG 24/7
+            </div>
+            <h1 class="hero__title">
+                Bản đồ số cảnh báo<br>
+                <em>an ninh Đà Nẵng</em>
+            </h1>
+            <p class="hero__sub">
+                Theo dõi tình hình an ninh trật tự, tìm người thất lạc và cập nhật tin tức
+                quan trọng tại thành phố Đà Nẵng theo thời gian thực.
+            </p>
+            <div class="hero__cta">
+                <a asp-controller="Map" asp-action="Index" class="btn-hero-primary">
+                    <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Xem Bản đồ ngay
+                </a>
+                <a asp-controller="Article" asp-action="Index" class="btn-hero-secondary">
+                    <svg viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+                    Tin tức an ninh
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════ STATS BAR ══════════════ -->
+    <div class="stats-bar">
+        <div class="stats-bar__inner">
+            <div class="stat-item">
+                <div class="stat-icon teal">
+                    <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <div>
+                    <div class="stat-number" data-target="1240" data-suffix="+">0+</div>
+                    <div class="stat-label">Cảnh báo đã ghi nhận</div>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon blue">
+                    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div>
+                    <div class="stat-number" data-target="320" data-suffix="+">0+</div>
+                    <div class="stat-label">Người đã được tìm thấy</div>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon amber">
+                    <svg viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/></svg>
+                </div>
+                <div>
+                    <div class="stat-number" data-target="5800" data-suffix="+">0+</div>
+                    <div class="stat-label">Tin tức đã đăng</div>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon coral">
+                    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div>
+                    <div class="stat-number" data-target="98" data-suffix="%">0%</div>
+                    <div class="stat-label">Độ hài lòng của người dùng</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ FEATURE CARDS ══════════════ -->
+    <section class="section">
+        <div class="section-header">
+            <div class="section-eyebrow">Hệ thống toàn diện</div>
+            <h2 class="section-title">Tất cả công cụ bạn cần trong một nền tảng</h2>
+            <p class="section-sub">Từ theo dõi bản đồ thời gian thực đến hỗ trợ tìm kiếm người thân — DaNang SafeMap luôn sẵn sàng bên bạn.</p>
+        </div>
+
+        <div class="feature-grid">
+            <!-- Card 1: Bản đồ -->
+            <a asp-controller="Map" asp-action="Index" class="fcard teal">
+                <div class="fcard__icon">
+                    <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <div class="fcard__title">Bản đồ trực tuyến</div>
+                <p class="fcard__desc">Theo dõi các cảnh báo an ninh, tai nạn và sự kiện quan trọng trên bản đồ thời gian thực của toàn thành phố Đà Nẵng.</p>
+                <span class="fcard__link">
+                    Truy cập Bản đồ
+                    <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </span>
+            </a>
+
+            <!-- Card 2: Tin tức -->
+            <a asp-controller="Article" asp-action="Index" class="fcard blue">
+                <div class="fcard__icon">
+                    <svg viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+                </div>
+                <div class="fcard__title">Tin tức an ninh</div>
+                <p class="fcard__desc">Cập nhật những tin tức mới nhất về tình hình an ninh trật tự, cảnh báo tội phạm và thông báo từ cơ quan chức năng thành phố.</p>
+                <span class="fcard__link">
+                    Xem Tin tức
+                    <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </span>
+            </a>
+
+            <!-- Card 3: Tìm người -->
+            <a asp-controller="MissingPerson" asp-action="Index" class="fcard amber">
+                <div class="fcard__icon">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </div>
+                <div class="fcard__title">Tìm người thất lạc</div>
+                <p class="fcard__desc">Đăng tin tìm kiếm người thân, hỗ trợ cộng đồng trong việc tìm kiếm người già, trẻ em đi lạc hoặc mất tích tại Đà Nẵng.</p>
+                <span class="fcard__link">
+                    Tìm kiếm ngay
+                    <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </span>
+            </a>
+
+            <!-- Card 4: Báo cáo sự cố -->
+            <a asp-controller="Alert" asp-action="Index" class="fcard coral">
+                <div class="fcard__icon">
+                    <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div class="fcard__title">Báo cáo sự cố</div>
+                <p class="fcard__desc">Gửi báo cáo sự cố an ninh, tai nạn giao thông hoặc các tình huống khẩn cấp để cơ quan chức năng xử lý kịp thời.</p>
+                <span class="fcard__link">
+                    Báo cáo ngay
+                    <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </span>
+            </a>
+        </div>
+    </section>
+
+    <!-- ══════════════ IMAGE SHOWCASE (Sơn Trà) ══════════════ -->
+    <section class="showcase-section">
+        <div class="showcase-inner">
+            <div class="section-header">
+                <div class="section-eyebrow">Địa danh Đà Nẵng</div>
+                <h2 class="section-title">Thành phố đáng sống — Đáng được bảo vệ</h2>
+                <p class="section-sub">DaNang SafeMap giúp duy trì sự bình yên cho những địa danh đẹp nhất của thành phố biển.</p>
+            </div>
+            <div class="showcase-grid">
+                <div class="showcase-card">
+                    <img src="https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=800&q=80&auto=format"
+                         alt="Bán đảo Sơn Trà, Đà Nẵng" loading="lazy" />
+                    <div class="showcase-card__overlay">
+                        <h4>Bán đảo Sơn Trà</h4>
+                        <p>Khu bảo tồn thiên nhiên tuyệt đẹp</p>
+                    </div>
+                </div>
+                <div class="showcase-card">
+                    <img src="https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=800&q=80&auto=format"
+                         alt="Cầu Rồng Đà Nẵng" loading="lazy" />
+                    <div class="showcase-card__overlay">
+                        <h4>Cầu Rồng</h4>
+                        <p>Biểu tượng trái tim Đà Nẵng</p>
+                    </div>
+                </div>
+                <div class="showcase-card">
+                    <img src="https://images.unsplash.com/photo-1528127269322-539801943592?w=800&q=80&auto=format"
+                         alt="Bãi biển Mỹ Khê Đà Nẵng" loading="lazy" />
+                    <div class="showcase-card__overlay">
+                        <h4>Bãi biển Mỹ Khê</h4>
+                        <p>Một trong những bãi biển đẹp nhất châu Á</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════ HOW IT WORKS ══════════════ -->
+    <section class="section steps-section">
+        <div class="section-header">
+            <div class="section-eyebrow">Cách hoạt động</div>
+            <h2 class="section-title">Bắt đầu chỉ trong vài bước đơn giản</h2>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <h4>Đăng ký tài khoản</h4>
+                <p>Tạo tài khoản miễn phí với email hoặc Google chỉ trong 30 giây.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <h4>Theo dõi bản đồ</h4>
+                <p>Xem các cảnh báo an ninh, sự cố và tin tức theo vị trí thực tế trên bản đồ.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <h4>Báo cáo sự cố</h4>
+                <p>Gửi báo cáo nhanh các tình huống bất thường để hỗ trợ cộng đồng kịp thời.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">4</div>
+                <h4>Kết nối cộng đồng</h4>
+                <p>Cùng người dân Đà Nẵng xây dựng thành phố an toàn và văn minh hơn.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════ CTA ══════════════ -->
+    <section class="cta-section">
+        <div class="cta-overlay"></div>
+        <div class="cta-inner">
+            <h2>Sẵn sàng bảo vệ cộng đồng?</h2>
+            <p>Tham gia cùng hàng nghìn người dân Đà Nẵng đang sử dụng DaNang SafeMap mỗi ngày.</p>
+            <a asp-controller="Auth" asp-action="Register" class="btn-cta">
+                <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                Đăng ký miễn phí ngay
+            </a>
+        </div>
+    </section>
+
+    <!-- ══════════════ FOOTER ══════════════ -->
+    <footer class="dsm-footer">
+        <div class="footer-main">
+            <div class="footer-col">
+                <div class="footer-brand">
+                    <div class="footer-brand-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <span class="footer-brand-name">DaNang SafeMap</span>
+                </div>
+                <p class="footer-desc">Hệ thống bản đồ số cảnh báo an ninh đô thị và hỗ trợ tìm người thất lạc tại thành phố Đà Nẵng.</p>
+                <div class="footer-social">
+                    <a href="#" aria-label="Facebook">
+                        <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                    </a>
+                    <a href="#" aria-label="Twitter">
+                        <svg viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+                    </a>
+                    <a href="#" aria-label="Youtube">
+                        <svg viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Tính năng</h4>
+                <ul class="footer-links">
+                    <li><a asp-controller="Map" asp-action="Index">Bản đồ trực tuyến</a></li>
+                    <li><a asp-controller="Article" asp-action="Index">Tin tức an ninh</a></li>
+                    <li><a asp-controller="MissingPerson" asp-action="Index">Tìm người thất lạc</a></li>
+                    <li><a asp-controller="Alert" asp-action="Index">Báo cáo sự cố</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Hỗ trợ</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Hướng dẫn sử dụng</a></li>
+                    <li><a href="#">Câu hỏi thường gặp</a></li>
+                    <li><a asp-controller="Home" asp-action="Privacy">Chính sách bảo mật</a></li>
+                    <li><a href="#">Điều khoản sử dụng</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Liên hệ</h4>
+                <ul class="footer-contact" style="list-style:none;">
+                    <li>
+                        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        Đà Nẵng, Việt Nam
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        contact@danangsafemap.vn
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 DaNang SafeMap. Bảo lưu mọi quyền. &nbsp;|&nbsp;
+            <a asp-controller="Home" asp-action="Privacy">Chính sách bảo mật</a>
+        </div>
+    </footer>
+
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const stats = document.querySelectorAll('.stat-number');
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const target = +entry.target.getAttribute('data-target');
+                        const suffix = entry.target.getAttribute('data-suffix') || '';
+                        let count = 0;
+                        const duration = 2000; // 2 seconds
+                        const increment = target / (duration / 16); // 60fps
+
+                        const updateCount = () => {
+                            count += increment;
+                            if (count < target) {
+                                entry.target.innerText = Math.ceil(count).toLocaleString() + suffix;
+                                requestAnimationFrame(updateCount);
+                            } else {
+                                entry.target.innerText = target.toLocaleString() + suffix;
+                            }
+                        };
+                        updateCount();
+                        observer.unobserve(entry.target); // Only animate once
+                    }
+                });
+            }, { threshold: 0.5 }); // Trigger when 50% visible
+
+            stats.forEach(stat => {
+                observer.observe(stat);
+            });
+        });
+    </script>
+}

@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DANANG-SAFEMAP-main", "DANANG-SAFEMAP-main", "{E41F123B-B455-4902-7B68-AA34FA2F098C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaNangSafeMap", "DANANG-SAFEMAP-main\DaNangSafeMap.csproj", "{C9348B8B-788D-5704-0BC6-370248EE91A4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C9348B8B-788D-5704-0BC6-370248EE91A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9348B8B-788D-5704-0BC6-370248EE91A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9348B8B-788D-5704-0BC6-370248EE91A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9348B8B-788D-5704-0BC6-370248EE91A4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C9348B8B-788D-5704-0BC6-370248EE91A4} = {E41F123B-B455-4902-7B68-AA34FA2F098C}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DF350AAA-D22F-490F-8345-7610F3CBA130}
+	EndGlobalSection
+EndGlobal
