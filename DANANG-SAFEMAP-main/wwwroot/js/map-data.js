@@ -274,10 +274,18 @@
                 for (const a of alertsCache) visibleIds.add(a.id);
             }
 
-            // Thêm marker mới
+            // Signature để phát hiện khi dữ liệu alert thay đổi (status / opacity / slug / toạ độ)
+            // → cần re-render marker thay vì giữ pin cũ.
+            const sigOf = (a) => `${a.alertTypeSlug}|${a.status}|${a.opacity}|${a.latitude}|${a.longitude}`;
+
+            // Thêm / cập nhật marker
             for (const a of alertsCache) {
                 if (!visibleIds.has(a.id)) continue;
-                if (htmlMarkers.has(a.id)) continue;
+                const existing = htmlMarkers.get(a.id);
+                const sig = sigOf(a);
+                if (existing && existing.sig === sig) continue;
+                if (existing) existing.marker.remove();
+
                 const el = document.createElement('div');
                 el.className = 'alert-marker';
                 el.innerHTML = buildMarkerSvg(a.alertTypeSlug, {
@@ -292,11 +300,11 @@
                 const marker = new goongjs.Marker({ element: el, anchor: 'bottom' })
                     .setLngLat([Number(a.longitude), Number(a.latitude)])
                     .addTo(map);
-                htmlMarkers.set(a.id, marker);
+                htmlMarkers.set(a.id, { marker, sig });
             }
             // Xoá marker không còn hiển thị
-            for (const [id, marker] of htmlMarkers) {
-                if (!visibleIds.has(id)) { marker.remove(); htmlMarkers.delete(id); }
+            for (const [id, entry] of htmlMarkers) {
+                if (!visibleIds.has(id)) { entry.marker.remove(); htmlMarkers.delete(id); }
             }
         }
 
