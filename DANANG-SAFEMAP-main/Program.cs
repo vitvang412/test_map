@@ -53,7 +53,10 @@ builder.Services.AddAuthentication(options =>
     {
         OnMessageReceived = context =>
         {
-            if (string.IsNullOrEmpty(context.Token))
+            // Chỉ rơi sang cookie khi request KHÔNG có header Authorization.
+            // (context.Token còn null tại thời điểm này; nếu chỉ check Token,
+            //  cookie sẽ luôn override Bearer header — không mong muốn.)
+            if (!context.Request.Headers.ContainsKey("Authorization"))
             {
                 var fromCookie = context.Request.Cookies["jwtToken"];
                 if (!string.IsNullOrEmpty(fromCookie)) context.Token = fromCookie;
