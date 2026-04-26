@@ -249,11 +249,34 @@ namespace DaNangSafeMap.Services.Implementations
             }
 
             // ── Cập nhật thống kê alert ──
+            var previousStatus = alert.Status;
             await RecalculateAlertStats(alert);
+
+            // ── Cộng điểm uy tín cho người đăng khi alert chuyển sang VISIBLE_VERIFIED lần đầu ──
+            var refreshed = await _alertRepo.GetByIdAsync(alertId);
+            if (refreshed != null &&
+                previousStatus != "VISIBLE_VERIFIED" &&
+                refreshed.Status == "VISIBLE_VERIFIED")
+            {
+                await AwardReputationAsync(refreshed.UserId, +2);
+            }
 
             return (true, model.VerificationType == "CONFIRM"
                 ? "Cảm ơn bạn đã xác nhận thông tin!"
                 : "Cảm ơn bạn đã phản hồi!");
+        }
+
+        /// <summary>
+        /// Cộng/trừ điểm uy tín (1-10) cho user. Không làm gì nếu user không tồn tại.
+        /// </summary>
+        private async Task AwardReputationAsync(int userId, int delta)
+        {
+            var user = await _userRepo.GetByIdAsync(userId);
+            if (user == null) return;
+            var newScore = Math.Clamp(user.ReputationScore + delta, 1, 10);
+            if (newScore == user.ReputationScore) return;
+            user.ReputationScore = newScore;
+            await _userRepo.UpdateAsync(user);
         }
 
         // ═══════════════════════════════════════════════
@@ -381,12 +404,20 @@ namespace DaNangSafeMap.Services.Implementations
             var alert = await _alertRepo.GetByIdAsync(alertId);
             if (alert == null) return false;
 
+            var wasVerified = alert.Status == "VISIBLE_VERIFIED";
+
             alert.Status = "VISIBLE_VERIFIED";  // Hiện thị đầy đủ trên bản đồ
             alert.Opacity = 100;               // Sáng rõ nhất - đã xác thực
             alert.UpdatedAt = DateTime.Now;
             // Không expire: Đã duyệt luôn hiện trên bản đồ mãi mãi (cho đến khi Admin xóa)
             alert.ExpiresAt = DateTime.Now.AddYears(10);
             await _alertRepo.UpdateAlertAsync(alert);
+
+            // ── Cộng điểm uy tín cho người đăng khi admin duyệt (lần đầu) ──
+            if (!wasVerified)
+            {
+                await AwardReputationAsync(alert.UserId, +2);
+            }
             return true;
         }
 
@@ -398,10 +429,18 @@ namespace DaNangSafeMap.Services.Implementations
             var alert = await _alertRepo.GetByIdAsync(alertId);
             if (alert == null) return false;
 
+            var wasRejected = alert.Status == "REJECTED";
+
             alert.Status = "REJECTED";
             alert.UpdatedAt = DateTime.Now;
             alert.AddressText = $"[Từ chối] {reason}";
             await _alertRepo.UpdateAlertAsync(alert);
+
+            // ── Trừ điểm uy tín cho người đăng khi báo cáo bị từ chối (lần đầu) ──
+            if (!wasRejected)
+            {
+                await AwardReputationAsync(alert.UserId, -1);
+            }
             return true;
         }
     }
