@@ -51,12 +51,13 @@ namespace DaNangSafeMap.Models.Entities
 
         // ── TRẠNG THÁI VÒNG ĐỜI (Lifecycle) ──
         /// <summary>
-        /// PENDING_REVIEW       → Vừa đăng, chờ xác nhận
-        /// VISIBLE_UNVERIFIED   → Hiển thị MỜ trên bản đồ
-        /// VISIBLE_VERIFIED     → Hiển thị ĐẬM (≥3 xác nhận)
-        /// RESOLVED             → Đã xử lý (icon xanh lá)
-        /// REJECTED             → Admin bác bỏ
-        /// EXPIRED              → Hết hạn, tự động ẩn
+        /// PENDING_REVIEW           → Vừa đăng, chờ xác nhận
+        /// VISIBLE_UNVERIFIED       → Hiển thị MỜ trên bản đồ
+        /// VISIBLE_VERIFIED         → Hiển thị ĐẬM (≥3 xác nhận)
+        /// INSUFFICIENT_EVIDENCE    → Admin yêu cầu bổ sung bằng chứng
+        /// RESOLVED                 → Đã xử lý (icon xanh lá)
+        /// REJECTED                 → Admin bác bỏ
+        /// EXPIRED                  → Hết hạn, tự động ẩn
         /// </summary>
         [Required]
         [MaxLength(30)]

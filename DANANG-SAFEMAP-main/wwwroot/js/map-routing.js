@@ -14,9 +14,9 @@ function waitForMap(cb, n = 0) {
 
 // ─── Hệ số hiệu chỉnh thời gian theo giao thông thực tế Đà Nẵng ────────────
 const TRAFFIC_FACTOR = {
-    driving: 1.40,   // ô tô: chạy theo OSRM driving duration x 1.40
-    motorbike: 1.20, // xe máy: linh hoạt hơn trong đô thị
-    foot: 1.00,      // đi bộ: OSRM mặc định ~5km/h, không cần hiệu chỉnh
+    driving: 1.40,   // ô tô: OSRM driving × 1.40
+    motorbike: 1.15, // xe máy: ~35km/h hiệu dụng, linh hoạt ngõ hẻm
+    bicycle: 1.10,   // xe đạp: OSRM bicycle × 1.10
 };
 
 
@@ -39,7 +39,7 @@ function initRouting(map) {
     let coordStart = null, coordEnd = null;
     let startMarker = null, endMarker = null;
 
-    let storedRoutes = { driving: null, motorbike: null, foot: null };
+    let storedRoutes = { driving: null, motorbike: null, bicycle: null };
     let activeMode = 'driving';
 
     // ── Pre-fill khi mở từ Place Card ─────────────────────
@@ -174,7 +174,7 @@ function initRouting(map) {
     const ROW_MAP = [
         ['resDriving', 'driving'],
         ['resMoto', 'motorbike'],
-        ['resFoot', 'foot'],
+        ['resBicycle', 'bicycle'],
     ];
 
     ROW_MAP.forEach(([id, mode]) => {
@@ -209,41 +209,42 @@ function initRouting(map) {
         if (!coordEnd) { showStatus('Không tìm thấy điểm đến.', 'error'); return; }
 
         try {
-            // Gọi song song 2 profile OSRM: driving + foot
-            const [rDriving, rFoot] = await Promise.all([
+            // Gọi song song 2 profile OSRM: driving + bicycle
+            const [rDriving, rBicycle] = await Promise.all([
                 osrm(coordStart, coordEnd, 'driving'),
-                osrm(coordStart, coordEnd, 'foot'),
+                osrm(coordStart, coordEnd, 'bicycle'),
             ]);
 
             if (!rDriving) { showStatus('Không tìm được đường đi.', 'error'); return; }
 
             // ── Xe máy ──────────────────────────────────────────────────────────
-            // Dùng geometry driving. Tính lại duration hợp lý:
-            // OSRM duration của xe máy lấy từ rDriving.duration x 0.85 (nhanh hơn ô tô 15% vì đỡ kẹt xe)
+            // Dùng geometry bicycle (đi được ngõ hẻm). Tính thời gian theo ~35 km/h × 1.15 traffic
+            const MOTO_BASE_SPEED_MPS = 35 / 3.6;
+            const bikeGeom = rBicycle || rDriving;
             const rMoto = {
-                geometry: rDriving.geometry,
-                distance: rDriving.distance,
-                duration: rDriving.duration * 0.85,
+                geometry: bikeGeom.geometry,
+                distance: bikeGeom.distance,
+                duration: bikeGeom.distance / MOTO_BASE_SPEED_MPS * TRAFFIC_FACTOR.motorbike,
             };
 
-            // ── Đi bộ ──────────────────────────────────────────────────────────
-            // Dùng trực tiếp OSRM foot (geometry + duration chuẩn cho đi bộ ~5 km/h)
-            // Nếu OSRM foot null → fallback driving geometry và tính theo vận tốc 5km/h (1.38 m/s)
-            const footGeometry = rFoot ? rFoot.geometry : rDriving.geometry;
-            const footDistance = rFoot ? rFoot.distance : rDriving.distance;
-            const rWalk = {
-                geometry: footGeometry,
-                distance: footDistance,
-                duration: rFoot ? rFoot.duration : (footDistance / 1.38),
+            // ── Xe đạp ──────────────────────────────────────────────────────────
+            const rBike = rBicycle ? {
+                geometry: rBicycle.geometry,
+                distance: rBicycle.distance,
+                duration: rBicycle.duration * TRAFFIC_FACTOR.bicycle,
+            } : {
+                geometry: rDriving.geometry,
+                distance: rDriving.distance,
+                duration: rDriving.distance / (15 / 3.6),
             };
 
             // Lưu cả 3 để switch khi click row
-            storedRoutes = { driving: rDriving, motorbike: rMoto, foot: rWalk };
+            storedRoutes = { driving: rDriving, motorbike: rMoto, bicycle: rBike };
 
             // ── Hiển thị kết quả ─────────────────────────────────────────────
             updateRow('resDriving', 'timeCar', 'distCar', rDriving, 'driving');
             updateRow('resMoto', 'timeMoto', 'distMoto', rMoto, 'motorbike');
-            updateRow('resFoot', 'timeFoot', 'distFoot', rWalk, 'foot');
+            updateRow('resBicycle', 'timeBicycle', 'distBicycle', rBike, 'bicycle');
 
             // Vẽ mặc định = ô tô
             activeMode = 'driving';
@@ -286,7 +287,7 @@ function initRouting(map) {
     // ── Xóa tuyến ─────────────────────────────────────────
     btnClear?.addEventListener('click', () => {
         clearRoute();
-        storedRoutes = { driving: null, motorbike: null, foot: null };
+        storedRoutes = { driving: null, motorbike: null, bicycle: null };
         if (elResults) elResults.style.display = 'none';
         hideStatus();
         if (inpStart) inpStart.value = '';

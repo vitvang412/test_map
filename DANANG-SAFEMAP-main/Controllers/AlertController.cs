@@ -225,6 +225,19 @@ namespace DaNangSafeMap.Controllers
                 ? Ok(new { success = true, message = "Đã từ chối báo cáo" })
                 : NotFound(new { success = false, message = "Không tìm thấy báo cáo" });
         }
+
+        // POST /api/alerts/admin/{id}/insufficient
+        [HttpPost("admin/{id}/insufficient")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> MarkInsufficientEvidence(int id, [FromBody] RejectAlertRequest body)
+        {
+            var adminId = GetUserId();
+            var ok = await _alertService.MarkInsufficientEvidenceAsync(
+                id, adminId, body.Reason ?? "Vui lòng bổ sung ảnh hoặc mô tả chi tiết hơn");
+            return ok
+                ? Ok(new { success = true, message = "Đã yêu cầu bổ sung bằng chứng. Thông báo đã gửi đến người dùng." })
+                : NotFound(new { success = false, message = "Không tìm thấy báo cáo" });
+        }
     }
 
     // Helper model

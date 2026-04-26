@@ -21,6 +21,9 @@
             <button class="btn-tab" data-status="VISIBLE_VERIFIED" onclick="switchTab(this)">
                 ✅ Đã xác thực
             </button>
+            <button class="btn-tab" data-status="INSUFFICIENT_EVIDENCE" onclick="switchTab(this)">
+                📋 Thiếu bằng chứng
+            </button>
             <button class="btn-tab" data-status="REJECTED" onclick="switchTab(this)">
                 ❌ Từ chối
             </button>
@@ -48,6 +51,19 @@
         <div class="modal-actions">
             <button onclick="closeRejectModal()" class="btn-cancel">Hủy</button>
             <button onclick="confirmReject()" class="btn-confirm-reject">Xác nhận từ chối</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thiếu bằng chứng -->
+<div id="insufficientModal" class="modal-overlay" style="display:none">
+    <div class="modal-box">
+        <h5>Yêu cầu bổ sung bằng chứng</h5>
+        <p class="text-muted">Người dùng sẽ nhận được thông báo yêu cầu bổ sung thêm ảnh hoặc mô tả chi tiết.</p>
+        <textarea id="insufficientReason" rows="3" placeholder="VD: Vui lòng thêm ảnh hoặc video tại hiện trường, mô tả rõ hơn thời điểm xảy ra..."></textarea>
+        <div class="modal-actions">
+            <button onclick="closeInsufficientModal()" class="btn-cancel">Hủy</button>
+            <button onclick="confirmInsufficient()" class="btn-confirm-insufficient">Gửi yêu cầu</button>
         </div>
     </div>
 </div>
@@ -204,6 +220,7 @@ body {
 .badge-approved { background: #ECFDF5; color: #047857; border: 1px solid #D1FAE5; }
 .badge-rejected { background: #FEF2F2; color: #B91C1C; border: 1px solid #FEE2E2; }
 .badge-verified { background: #EFF6FF; color: #1D4ED8; border: 1px solid #DBEAFE; }
+.badge-insufficient { background: #FFF7ED; color: #C2410C; border: 1px solid #FED7AA; }
 
 .alert-card__title {
     font-size: 18px;
@@ -307,6 +324,35 @@ body {
 .btn-reject:hover { 
     background: #FEF2F2; 
 }
+
+.btn-insufficient {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid #D97706;
+    background: #fff;
+    color: #D97706;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-insufficient:hover { 
+    background: #FFFBEB; 
+}
+
+.btn-confirm-insufficient {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    background: #D97706;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-confirm-insufficient:hover { background: #B45309; }
 
 .btn-view-map {
     padding: 8px 16px;
@@ -540,6 +586,7 @@ body {
             'VISIBLE_UNVERIFIED': ['badge-pending', '⏳ Cần xác thực'],
             'VISIBLE_VERIFIED': ['badge-verified', '✅ Đã xác thực cứng'],
             'PENDING_REVIEW': ['badge-pending', '⏳ Chờ duyệt (Cũ)'],
+            'INSUFFICIENT_EVIDENCE': ['badge-insufficient', '📋 Thiếu bằng chứng'],
             'REJECTED': ['badge-rejected', '❌ Từ chối'],
             'EXPIRED': ['badge-rejected', '⏱ Hết hạn']
         };
@@ -551,10 +598,23 @@ body {
             ).join('') || '';
 
             const isPending = a.status === 'VISIBLE_UNVERIFIED' || a.status === 'PENDING_REVIEW';
-            const actionBtns = isPending ? `
-                <button class="btn-approve" onclick="approveAlert(${a.id})">✅ Duyệt - Cho hiển thị</button>
-                <button class="btn-reject" onclick="openRejectModal(${a.id})">❌ Từ chối / Xóa</button>
-            ` : `<span style="font-size:12px;color:#94a3b8">Đã xử lý</span>`;
+            const isInsufficient = a.status === 'INSUFFICIENT_EVIDENCE';
+            let actionBtns;
+            if (isPending) {
+                actionBtns = `
+                    <button class="btn-approve" onclick="approveAlert(${a.id})">Duyệt — Cho hiển thị</button>
+                    <button class="btn-insufficient" onclick="openInsufficientModal(${a.id})">Thiếu bằng chứng</button>
+                    <button class="btn-reject" onclick="openRejectModal(${a.id})">Từ chối</button>
+                `;
+            } else if (isInsufficient) {
+                actionBtns = `
+                    <button class="btn-approve" onclick="approveAlert(${a.id})">Duyệt — Cho hiển thị</button>
+                    <button class="btn-reject" onclick="openRejectModal(${a.id})">Từ chối</button>
+                    <span style="font-size:11px;color:#B45309;margin-top:4px">Đang chờ bổ sung bằng chứng</span>
+                `;
+            } else {
+                actionBtns = `<span style="font-size:12px;color:#94a3b8">Đã xử lý</span>`;
+            }
 
             const timeStr = new Date(a.incidentTime).toLocaleString('vi-VN');
             return `
@@ -695,8 +755,54 @@ body {
         setTimeout(() => el.remove(), 3500);
     }
 
+    // ── Insufficient Evidence Modal ──
+    let pendingInsufficientId = null;
+
+    function openInsufficientModal(id) {
+        pendingInsufficientId = id;
+        document.getElementById('insufficientReason').value = '';
+        document.getElementById('insufficientModal').style.display = 'flex';
+        document.getElementById('insufficientReason').focus();
+    }
+
+    function closeInsufficientModal() {
+        pendingInsufficientId = null;
+        document.getElementById('insufficientModal').style.display = 'none';
+    }
+
+    async function confirmInsufficient() {
+        if (!pendingInsufficientId) return;
+        const reason = document.getElementById('insufficientReason').value.trim();
+
+        const res = await fetch(`${API}/admin/${pendingInsufficientId}/insufficient`, {
+            method: 'POST',
+            headers: authHeader,
+            body: JSON.stringify({ reason: reason || null })
+        });
+        const data = await res.json();
+
+        closeInsufficientModal();
+        if (data.success) {
+            const card = document.getElementById(`card-${pendingInsufficientId}`);
+            if (card) {
+                card.style.opacity = '0.5';
+                setTimeout(() => {
+                    card.remove();
+                    if (!document.querySelector('.alert-card')) loadAlerts(currentStatus, currentPage);
+                }, 400);
+            }
+            showNotif(data.message, 'success');
+        } else {
+            showNotif(data.message, 'error');
+        }
+    }
+
     document.getElementById('rejectModal').addEventListener('click', function(e) {
         if (e.target === this) closeRejectModal();
+    });
+
+    document.getElementById('insufficientModal').addEventListener('click', function(e) {
+        if (e.target === this) closeInsufficientModal();
     });
 
     // Load initial

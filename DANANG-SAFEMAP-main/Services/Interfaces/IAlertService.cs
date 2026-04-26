@@ -39,5 +39,6 @@ namespace DaNangSafeMap.Services.Interfaces
         Task<(List<AlertMapDto> Items, int Total)> GetAllAlertsForAdminAsync(string? status, int page, int pageSize);
         Task<bool> ApproveAlertAsync(int alertId, int adminUserId);
         Task<bool> RejectAlertAsync(int alertId, int adminUserId, string reason);
+        Task<bool> MarkInsufficientEvidenceAsync(int alertId, int adminUserId, string reason);
     }
 }

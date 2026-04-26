@@ -404,5 +404,36 @@ namespace DaNangSafeMap.Services.Implementations
             await _alertRepo.UpdateAlertAsync(alert);
             return true;
         }
+
+        /// <summary>
+        /// Admin đánh dấu thiếu bằng chứng — hiện mờ trên bản đồ, thông báo cho user bổ sung.
+        /// </summary>
+        public async Task<bool> MarkInsufficientEvidenceAsync(int alertId, int adminUserId, string reason)
+        {
+            var alert = await _alertRepo.GetByIdAsync(alertId);
+            if (alert == null) return false;
+
+            alert.Status = "INSUFFICIENT_EVIDENCE";
+            alert.Opacity = 25;
+            alert.UpdatedAt = DateTime.Now;
+            // Giữ ExpiresAt ngắn hạn: 24h kể từ lúc đánh dấu
+            alert.ExpiresAt = DateTime.Now.AddHours(24);
+            await _alertRepo.UpdateAlertAsync(alert);
+
+            // Tạo thông báo cho người dùng bổ sung bằng chứng
+            await _alertRepo.CreateNotificationAsync(new Notification
+            {
+                UserId = alert.UserId,
+                Title = "Báo cáo cần bổ sung bằng chứng",
+                Message = string.IsNullOrWhiteSpace(reason)
+                    ? $"Báo cáo \"{alert.Title}\" của bạn cần thêm ảnh hoặc mô tả chi tiết hơn để được xác thực."
+                    : $"Báo cáo \"{alert.Title}\": {reason}. Vui lòng bổ sung thêm bằng chứng.",
+                Type = "INSUFFICIENT_EVIDENCE",
+                RelatedAlertId = alertId,
+                CreatedAt = DateTime.Now
+            });
+
+            return true;
+        }
     }
 }

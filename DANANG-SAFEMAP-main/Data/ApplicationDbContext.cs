@@ -19,6 +19,7 @@ namespace DaNangSafeMap.Data
         public DbSet<SecurityAlert> SecurityAlerts { get; set; }
         public DbSet<AlertMedia> AlertMedia { get; set; }
         public DbSet<AlertVerification> AlertVerifications { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -194,6 +195,28 @@ namespace DaNangSafeMap.Data
 
                 // Index
                 entity.HasIndex(e => new { e.AlertId, e.VerificationType });
+            });
+
+            // ════════════════════════════════════════════
+            // NOTIFICATION
+            // ════════════════════════════════════════════
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.Property(e => e.Type)
+                      .HasDefaultValue("GENERAL");
+
+                entity.Property(e => e.IsRead)
+                      .HasDefaultValue(false);
+
+                entity.Property(e => e.CreatedAt)
+                      .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasOne(e => e.User)
+                      .WithMany()
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(e => new { e.UserId, e.IsRead });
             });
         }
     }

@@ -48,5 +48,8 @@ namespace DaNangSafeMap.Repositories
         // ── Admin: Lấy tất cả alerts (có phân trang) ──
         Task<List<SecurityAlert>> GetAllAlertsForAdminAsync(string? status, int page, int pageSize);
         Task<int> CountAllAlertsAsync(string? status);
+
+        // ── Notifications ──
+        Task CreateNotificationAsync(Notification notification);
     }
 }

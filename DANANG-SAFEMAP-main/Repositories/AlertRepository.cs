@@ -77,19 +77,21 @@ namespace DaNangSafeMap.Repositories
                 .Include(a => a.User)
                 .Include(a => a.Media.Where(m => m.IsActive))
                 .Where(a =>
-                    // ✅ VISIBLE_VERIFIED: Admin đã duyệt → luôn hiển thị (bỏ qua time filter)
                     (a.Status == "VISIBLE_VERIFIED"
                         && a.Latitude >= southLat && a.Latitude <= northLat
                         && a.Longitude >= westLng && a.Longitude <= eastLng)
                     ||
-                    // ⏳ VISIBLE_UNVERIFIED: Mới đăng → marker mờ, lọc theo thời gian
                     (a.Status == "VISIBLE_UNVERIFIED"
                         && a.Latitude >= southLat && a.Latitude <= northLat
                         && a.Longitude >= westLng && a.Longitude <= eastLng
                         && a.IncidentTime >= fromTime && a.IncidentTime <= toTime)
                     ||
-                    // 🕐 PENDING_REVIEW: Dữ liệu cũ, cũng hiện mờ để cộng đồng xác nhận
                     (a.Status == "PENDING_REVIEW"
+                        && a.Latitude >= southLat && a.Latitude <= northLat
+                        && a.Longitude >= westLng && a.Longitude <= eastLng
+                        && a.IncidentTime >= fromTime && a.IncidentTime <= toTime)
+                    ||
+                    (a.Status == "INSUFFICIENT_EVIDENCE"
                         && a.Latitude >= southLat && a.Latitude <= northLat
                         && a.Longitude >= westLng && a.Longitude <= eastLng
                         && a.IncidentTime >= fromTime && a.IncidentTime <= toTime)
@@ -168,6 +170,9 @@ namespace DaNangSafeMap.Repositories
                     // PENDING quá 24h
                     (a.Status == "PENDING_REVIEW" && a.CreatedAt < now.AddHours(-24))
                     ||
+                    // INSUFFICIENT_EVIDENCE quá 24h
+                    (a.Status == "INSUFFICIENT_EVIDENCE" && a.CreatedAt < now.AddHours(-24))
+                    ||
                     // RESOLVED quá 24h
                     (a.Status == "RESOLVED" && a.ResolvedAt != null
                         && a.ResolvedAt < now.AddHours(-24))
@@ -220,8 +225,9 @@ namespace DaNangSafeMap.Repositories
                     .ThenInclude(t => t.Category)
                 .Include(a => a.User)
                 .Include(a => a.Media.Where(m => m.IsActive))
-                // Lấy cả PENDING_REVIEW (cũ) và VISIBLE_UNVERIFIED (đang chờ Admin duyệt thêm)
-                .Where(a => a.Status == "VISIBLE_UNVERIFIED" || a.Status == "PENDING_REVIEW")
+                .Where(a => a.Status == "VISIBLE_UNVERIFIED"
+                    || a.Status == "PENDING_REVIEW"
+                    || a.Status == "INSUFFICIENT_EVIDENCE")
                 .OrderByDescending(a => a.CreatedAt)
                 .ToListAsync();
         }
@@ -252,6 +258,16 @@ namespace DaNangSafeMap.Repositories
             if (!string.IsNullOrEmpty(status))
                 query = query.Where(a => a.Status == status);
             return await query.CountAsync();
+        }
+
+        // ═══════════════════════════════════════════════
+        // NOTIFICATIONS
+        // ═══════════════════════════════════════════════
+
+        public async Task CreateNotificationAsync(Notification notification)
+        {
+            _context.Set<Notification>().Add(notification);
+            await _context.SaveChangesAsync();
         }
     }
 }
