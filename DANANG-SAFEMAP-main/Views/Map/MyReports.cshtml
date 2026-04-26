@@ -1,4 +1,328 @@
 @{
     ViewData["Title"] = "Báo cáo của tôi";
 }
-<!-- Báo cáo của tôi sẽ được làm lại từ đầu -->
+
+<link rel="stylesheet" href="~/css/map.css" asp-append-version="true" />
+
+<div class="myrep-page">
+    <div class="myrep-head">
+        <div>
+            <h1 class="myrep-title">Báo cáo của tôi</h1>
+            <p class="myrep-sub">Theo dõi trạng thái các cảnh báo bạn đã gửi và lượt xác nhận của cộng đồng.</p>
+        </div>
+        <a href="/Map" class="myrep-cta">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Gửi báo cáo mới
+        </a>
+    </div>
+
+    <div class="myrep-stats" id="myrepStats">
+        <div class="myrep-stat"><span class="myrep-stat__label">Tổng</span><b id="myrepTotal">—</b></div>
+        <div class="myrep-stat myrep-stat--ok"><span class="myrep-stat__label">Đã xác thực</span><b id="myrepVerified">—</b></div>
+        <div class="myrep-stat myrep-stat--warn"><span class="myrep-stat__label">Chờ cộng đồng</span><b id="myrepPending">—</b></div>
+        <div class="myrep-stat myrep-stat--bad"><span class="myrep-stat__label">Bị từ chối</span><b id="myrepRejected">—</b></div>
+    </div>
+
+    <div class="myrep-filters" id="myrepFilters">
+        <button class="myrep-chip is-active" data-status="">Tất cả</button>
+        <button class="myrep-chip" data-status="VISIBLE_VERIFIED">Đã xác thực</button>
+        <button class="myrep-chip" data-status="VISIBLE_UNVERIFIED">Đang chờ cộng đồng</button>
+        <button class="myrep-chip" data-status="PENDING_REVIEW">Chờ duyệt</button>
+        <button class="myrep-chip" data-status="REJECTED">Bị từ chối</button>
+        <button class="myrep-chip" data-status="EXPIRED">Hết hạn</button>
+    </div>
+
+    <div class="myrep-list" id="myrepList">
+        <div class="myrep-loading">
+            <div class="myrep-spinner"></div>
+            Đang tải báo cáo của bạn...
+        </div>
+    </div>
+</div>
+
+<style>
+.myrep-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+    color: #0F172A;
+}
+.myrep-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.myrep-title { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
+.myrep-sub   { font-size: 13.5px; color: #64748B; margin: 4px 0 0; line-height: 1.55; }
+.myrep-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: #fff;
+    border-radius: 10px;
+    font-weight: 700; font-size: 13.5px;
+    text-decoration: none;
+    box-shadow: 0 2px 12px rgba(16,185,129,.3);
+    transition: transform .15s, box-shadow .15s;
+}
+.myrep-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,.45); }
+.myrep-cta svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.myrep-stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px; margin-bottom: 20px;
+}
+.myrep-stat {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 4px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+.myrep-stat__label { font-size: 11.5px; color: #64748B; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+.myrep-stat b { font-size: 26px; font-weight: 800; color: #0F172A; letter-spacing: -1px; }
+.myrep-stat--ok   { border-left: 3px solid #10B981; }
+.myrep-stat--warn { border-left: 3px solid #F59E0B; }
+.myrep-stat--bad  { border-left: 3px solid #EF4444; }
+
+.myrep-filters {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 18px;
+}
+.myrep-chip {
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1.5px solid #E2E8F0;
+    background: #fff;
+    color: #475569;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all .15s;
+}
+.myrep-chip:hover { border-color: #CBD5E1; color: #0F172A; }
+.myrep-chip.is-active {
+    background: #0F172A; color: #fff; border-color: #0F172A;
+}
+
+.myrep-list { display: flex; flex-direction: column; gap: 12px; }
+.myrep-card {
+    background: #fff;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 16px;
+    align-items: flex-start;
+    transition: border-color .15s, transform .15s, box-shadow .15s;
+    position: relative;
+}
+.myrep-card:hover {
+    border-color: #CBD5E1;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px -8px rgba(15, 23, 42, .1);
+}
+.myrep-card__icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+.myrep-card__icon svg { width: 22px; height: 22px; }
+
+.myrep-card__title { font-size: 14.5px; font-weight: 700; color: #0F172A; line-height: 1.35; margin-bottom: 4px; }
+.myrep-card__desc  { font-size: 12.5px; color: #475569; line-height: 1.5; max-height: 2.8em; overflow: hidden; text-overflow: ellipsis; }
+.myrep-card__meta {
+    display: flex; flex-wrap: wrap; gap: 12px;
+    margin-top: 8px;
+    font-size: 11.5px; color: #64748B;
+}
+.myrep-card__meta span { display: inline-flex; align-items: center; gap: 4px; }
+.myrep-card__meta svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.myrep-card__side {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+}
+.myrep-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .2px;
+    white-space: nowrap;
+}
+.myrep-badge--ok    { background: #DCFCE7; color: #15803D; }
+.myrep-badge--warn  { background: #FEF3C7; color: #B45309; }
+.myrep-badge--bad   { background: #FEE2E2; color: #B91C1C; }
+.myrep-badge--expr  { background: #F1F5F9; color: #475569; }
+.myrep-votes { display: flex; gap: 6px; font-size: 11px; color: #64748B; font-weight: 600; }
+.myrep-votes .ok   { color: #10B981; }
+.myrep-votes .bad  { color: #EF4444; }
+
+.myrep-loading {
+    display: flex; align-items: center; gap: 10px;
+    justify-content: center;
+    padding: 60px 0;
+    color: #64748B;
+    font-size: 13px;
+}
+.myrep-spinner {
+    width: 20px; height: 20px;
+    border: 3px solid #E2E8F0;
+    border-top-color: #10B981;
+    border-radius: 50%;
+    animation: myrepSpin 0.8s linear infinite;
+}
+@@keyframes myrepSpin { to { transform: rotate(360deg); } }
+
+.myrep-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #94A3B8;
+}
+.myrep-empty h3 { color: #0F172A; font-size: 16px; font-weight: 700; margin: 12px 0 4px; }
+.myrep-empty p { font-size: 13px; line-height: 1.55; max-width: 360px; margin: 0 auto; }
+
+@@media (max-width: 600px) {
+    .myrep-card {
+        grid-template-columns: auto 1fr;
+    }
+    .myrep-card__side { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; }
+}
+</style>
+
+<script>
+(function () {
+    const API = '/api/alerts';
+    const TYPE_STYLE = {
+        theft_motorbike:    { color: '#DC2626' },
+        pickpocket_robbery: { color: '#B91C1C' },
+        burglary:           { color: '#991B1B' },
+        street_racing:      { color: '#EA580C' },
+        fighting_disorder:  { color: '#F59E0B' },
+        scam_tourist:       { color: '#D97706' },
+        overcharging:       { color: '#B45309' }
+    };
+    let myItems = [];
+    let currentStatus = '';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('#myrepFilters .myrep-chip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#myrepFilters .myrep-chip').forEach(b => b.classList.toggle('is-active', b === btn));
+                currentStatus = btn.dataset.status || '';
+                renderList();
+            });
+        });
+        loadMyReports();
+    });
+
+    async function loadMyReports() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            document.getElementById('myrepList').innerHTML = emptyState('Bạn cần đăng nhập', 'Vui lòng đăng nhập để xem các báo cáo đã gửi.', true);
+            return;
+        }
+        try {
+            const res = await fetch(`${API}/my`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (res.status === 401) {
+                document.getElementById('myrepList').innerHTML = emptyState('Phiên đăng nhập đã hết hạn', 'Vui lòng đăng nhập lại để xem báo cáo.', true);
+                return;
+            }
+            if (!res.ok) throw new Error('Network error');
+            myItems = await res.json();
+            updateStats();
+            renderList();
+        } catch (e) {
+            document.getElementById('myrepList').innerHTML = emptyState('Không thể tải dữ liệu', 'Đã xảy ra lỗi khi kết nối. Vui lòng thử lại.');
+        }
+    }
+
+    function updateStats() {
+        document.getElementById('myrepTotal').textContent     = myItems.length;
+        document.getElementById('myrepVerified').textContent  = myItems.filter(a => a.status === 'VISIBLE_VERIFIED').length;
+        document.getElementById('myrepPending').textContent   = myItems.filter(a => a.status === 'VISIBLE_UNVERIFIED' || a.status === 'PENDING_REVIEW').length;
+        document.getElementById('myrepRejected').textContent  = myItems.filter(a => a.status === 'REJECTED').length;
+    }
+
+    function renderList() {
+        const host = document.getElementById('myrepList');
+        const items = currentStatus ? myItems.filter(a => a.status === currentStatus) : myItems;
+        if (!items.length) {
+            host.innerHTML = emptyState(
+                currentStatus ? 'Không có báo cáo nào với bộ lọc này' : 'Bạn chưa gửi báo cáo nào',
+                currentStatus ? 'Hãy thử chọn bộ lọc khác ở phía trên.' : 'Khi phát hiện sự cố tại Đà Nẵng — Quảng Nam, bạn có thể tạo báo cáo trực tiếp trên bản đồ.'
+            );
+            return;
+        }
+        host.innerHTML = items.map(renderCard).join('');
+    }
+
+    function renderCard(a) {
+        const s = TYPE_STYLE[a.alertTypeSlug] || { color: '#64748B' };
+        const badge = getBadge(a.status);
+        const time = formatTime(a.incidentTime);
+        return `
+            <div class="myrep-card">
+                <div class="myrep-card__icon" style="background:${s.color}">
+                    <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" fill="none" stroke="#fff" stroke-width="2"/><circle cx="12" cy="10" r="3" fill="#fff"/></svg>
+                </div>
+                <div>
+                    <div class="myrep-card__title">${escHtml(a.title)}</div>
+                    <div class="myrep-card__desc">${escHtml(a.description)}</div>
+                    <div class="myrep-card__meta">
+                        <span><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg>${escHtml(a.addressText || 'Chưa rõ địa chỉ')}</span>
+                        <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>${time}</span>
+                        <span>${escHtml(a.alertTypeName)}</span>
+                    </div>
+                </div>
+                <div class="myrep-card__side">
+                    <span class="myrep-badge ${badge.cls}">${badge.text}</span>
+                    <div class="myrep-votes">
+                        <span class="ok">✓ ${a.confirmCount || 0}</span>
+                        <span class="bad">✗ ${a.denyCount || 0}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function getBadge(status) {
+        switch (status) {
+            case 'VISIBLE_VERIFIED':    return { cls: 'myrep-badge--ok',   text: 'Đã xác thực' };
+            case 'VISIBLE_UNVERIFIED':  return { cls: 'myrep-badge--warn', text: 'Chờ cộng đồng' };
+            case 'PENDING_REVIEW':      return { cls: 'myrep-badge--warn', text: 'Chờ duyệt' };
+            case 'REJECTED':            return { cls: 'myrep-badge--bad',  text: 'Bị từ chối' };
+            case 'EXPIRED':             return { cls: 'myrep-badge--expr', text: 'Hết hạn' };
+            case 'RESOLVED':            return { cls: 'myrep-badge--ok',   text: 'Đã xử lý' };
+            default:                    return { cls: 'myrep-badge--expr', text: status || '' };
+        }
+    }
+
+    function formatTime(iso) {
+        try { return new Date(iso).toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
+        catch { return iso || ''; }
+    }
+
+    function emptyState(title, desc, showLogin) {
+        return `
+            <div class="myrep-empty">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <h3>${escHtml(title)}</h3>
+                <p>${escHtml(desc)}</p>
+                ${showLogin ? '<p style="margin-top:14px"><a href="/Auth/Login" style="color:#10B981;font-weight:700;text-decoration:none">Đăng nhập →</a></p>' : ''}
+            </div>
+        `;
+    }
+
+    function escHtml(s) {
+        if (s == null) return '';
+        const d = document.createElement('div'); d.textContent = String(s); return d.innerHTML;
+    }
+})();
+</script>
