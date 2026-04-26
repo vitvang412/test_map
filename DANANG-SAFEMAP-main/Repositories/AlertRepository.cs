@@ -170,8 +170,8 @@ namespace DaNangSafeMap.Repositories
                     // PENDING quá 24h
                     (a.Status == "PENDING_REVIEW" && a.CreatedAt < now.AddHours(-24))
                     ||
-                    // INSUFFICIENT_EVIDENCE quá 24h
-                    (a.Status == "INSUFFICIENT_EVIDENCE" && a.CreatedAt < now.AddHours(-24))
+                    // INSUFFICIENT_EVIDENCE quá 24h kể từ lúc đánh dấu
+                    (a.Status == "INSUFFICIENT_EVIDENCE" && a.ExpiresAt != null && a.ExpiresAt < now)
                     ||
                     // RESOLVED quá 24h
                     (a.Status == "RESOLVED" && a.ResolvedAt != null

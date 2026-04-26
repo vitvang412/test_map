@@ -224,14 +224,14 @@ function initRouting(map) {
             const rMoto = {
                 geometry: bikeGeom.geometry,
                 distance: bikeGeom.distance,
-                duration: bikeGeom.distance / MOTO_BASE_SPEED_MPS * TRAFFIC_FACTOR.motorbike,
+                duration: bikeGeom.distance / MOTO_BASE_SPEED_MPS,
             };
 
             // ── Xe đạp ──────────────────────────────────────────────────────────
             const rBike = rBicycle ? {
                 geometry: rBicycle.geometry,
                 distance: rBicycle.distance,
-                duration: rBicycle.duration * TRAFFIC_FACTOR.bicycle,
+                duration: rBicycle.duration,
             } : {
                 geometry: rDriving.geometry,
                 distance: rDriving.distance,
