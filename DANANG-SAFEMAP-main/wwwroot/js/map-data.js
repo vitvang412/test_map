@@ -205,6 +205,14 @@
         map.on('mouseenter', 'alerts-clusters', () => map.getCanvas().style.cursor = 'pointer');
         map.on('mouseleave', 'alerts-clusters', () => map.getCanvas().style.cursor = '');
 
+        // Khi source `alerts-src` vừa được nạp/cập nhật cluster → refresh HTML marker
+        // (cluster chỉ hình thành sau khi feature được ingest, nên không thể tính trước lúc setData).
+        map.on('sourcedata', (e) => {
+            if (e.sourceId === 'alerts-src' && e.isSourceLoaded) {
+                refreshHtmlMarkers();
+            }
+        });
+
         // ── Debounced loader khi map di chuyển / zoom ──
         let loadTimer = null;
         function scheduleLoad() {
@@ -254,24 +262,29 @@
             refreshHtmlMarkers();
         }
 
-        // Khi cluster hoạt động, alert nào bị gom nhóm sẽ không render HTML marker.
-        // Chúng ta dùng queryRenderedFeatures trên layer ẩn 'unclustered' để biết alert nào đang unclustered.
-        // Để đơn giản & đáng tin cậy, ta quyết định dựa vào zoom:  nếu zoom > clusterMaxZoom (=13) → render tất cả;
-        // ngược lại → dựa vào kết quả cluster của mapbox để ẩn/hiện.
+        // Render HTML marker cho mọi alert KHÔNG bị gom vào cluster — ở mọi mức zoom.
+        // Tại mỗi zoom/moveend, querySourceFeatures trả về cluster features + unclustered leaves;
+        // alert nào có trong unclustered leaves → render HTML marker, còn lại để cluster bubble lo.
         function refreshHtmlMarkers() {
             const show = currentMode === MODE.MARKERS || currentMode === MODE.BOTH;
-            const z = map.getZoom();
-            // Dưới ngưỡng cluster → chỉ hiện những điểm không nằm trong cluster.
-            // Lấy feature unclustered bằng cách query source (không phải render).
-            const src = map.getSource('alerts-src');
-            // mapbox-gl-js có `source.getClusterLeaves`, nhưng chúng ta đi đường đơn giản:
-            // - Zoom > clusterMaxZoom → hiện tất cả;
-            // - Zoom <= clusterMaxZoom → ẩn tất cả HTML marker (cluster bubble đã đảm nhiệm).
-            const showAll = show && z > 13;
             const visibleIds = new Set();
 
-            if (showAll) {
-                for (const a of alertsCache) visibleIds.add(a.id);
+            if (show && map.getSource('alerts-src')) {
+                // Lấy danh sách id các feature chưa bị cluster (ở zoom hiện tại)
+                let uncluster = [];
+                try {
+                    uncluster = map.querySourceFeatures('alerts-src', {
+                        filter: ['!', ['has', 'point_count']]
+                    });
+                } catch (_) { /* source có thể chưa sẵn sàng */ }
+                for (const f of uncluster) {
+                    if (f.properties && f.properties.id != null) visibleIds.add(f.properties.id);
+                }
+                // Fallback: nếu chưa có cluster tính xong mà zoom đã vượt clusterMaxZoom
+                // thì hiện tất cả để tránh "màn hình trắng" lúc mới load.
+                if (!visibleIds.size && map.getZoom() > 13) {
+                    for (const a of alertsCache) visibleIds.add(a.id);
+                }
             }
 
             // Signature để phát hiện khi dữ liệu alert thay đổi (status / opacity / slug / toạ độ)
