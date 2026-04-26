@@ -48,11 +48,44 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
     };
+    // Cho phép JWT đến từ cookie "jwtToken" (login form đặt sẵn) khi không có header Authorization.
+    options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            if (string.IsNullOrEmpty(context.Token))
+            {
+                var fromCookie = context.Request.Cookies["jwtToken"];
+                if (!string.IsNullOrEmpty(fromCookie)) context.Token = fromCookie;
+            }
+            return Task.CompletedTask;
+        }
+    };
 })
-.AddGoogle(options =>
+;
+
+// Google OAuth: chỉ đăng ký khi đã cấu hình đầy đủ ClientId/ClientSecret.
+// Điều này tránh OAuthOptions.Validate() throw khi `Google:ClientSecret` còn rỗng
+// (ví dụ trong môi trường dev hoặc khi chưa tạo OAuth credentials).
+var googleClientId = builder.Configuration["Google:ClientId"];
+var googleClientSecret = builder.Configuration["Google:ClientSecret"];
+if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
 {
-    options.ClientId = builder.Configuration["Google:ClientId"]!;
-    options.ClientSecret = builder.Configuration["Google:ClientSecret"]!;
+    builder.Services.AddAuthentication().AddGoogle(options =>
+    {
+        options.ClientId = googleClientId;
+        options.ClientSecret = googleClientSecret;
+    });
+}
+
+// [Authorize] chấp nhận cả Cookie lẫn JWT (header Authorization hoặc cookie jwtToken).
+builder.Services.AddAuthorization(options =>
+{
+    options.DefaultPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            JwtBearerDefaults.AuthenticationScheme)
+        .RequireAuthenticatedUser()
+        .Build();
 });
 
 // ── 5. Cấu hình MVC & Controllers ──
